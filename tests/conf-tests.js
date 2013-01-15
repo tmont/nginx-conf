@@ -146,4 +146,36 @@ describe('configuration editing', function() {
 			}(name));
 		}
 	});
+
+	it('should convert to an nginx-compatible string', function(done) {
+		NginxConfFile.createFromSource('foo bar; baz { bat qux; }', function(err, file) {
+			should.not.exist(err);
+			should.exist(file);
+			var actual = file.toString();
+			var expected =
+'foo bar;\n\
+baz {\n\
+    bat qux;\n\
+}\n\n';
+
+			actual.should.equal(expected);
+			done();
+		});
+	});
+
+	it('should convert to an nginx-compatible string with custom TAB', function(done) {
+		NginxConfFile.createFromSource('foo bar; baz { bat qux; }', { tab: '   ' }, function(err, file) {
+			should.not.exist(err);
+			should.exist(file);
+			var actual = file.toString();
+			var expected =
+'foo bar;\n\
+baz {\n\
+   bat qux;\n\
+}\n\n';
+
+			actual.should.equal(expected);
+			done();
+		});
+	});
 });

@@ -26,7 +26,7 @@ function createConfItem(file, context, name, value, children) {
 
 		_getString: function(depth) {
 			depth = depth || +!this._root;
-			var prefix = new Array(depth).join('  '),
+			var prefix = new Array(depth).join(file.tab),
 				buffer = prefix + (!this._root ? this._name : '');
 
 			if (this._value) {
@@ -35,10 +35,10 @@ function createConfItem(file, context, name, value, children) {
 
 			var properties = Object.keys(this)
 				.filter(function(key) {
-					return typeof(this[key]) !== 'function';
+					return typeof(newContext[key]) !== 'function';
 				})
 				.map(function(key) {
-					return this[key];
+					return newContext[key];
 				});
 
 			if (properties.length) {
@@ -59,7 +59,7 @@ function createConfItem(file, context, name, value, children) {
 		},
 
 		toString: function() {
-			return this._getString(1);
+			return this._getString(0);
 		}
 	};
 
@@ -93,8 +93,10 @@ function createConfItem(file, context, name, value, children) {
 	}
 }
 
-function NginxConfFile(tree) {
+function NginxConfFile(tree, options) {
+	options = options || {};
 	this.files = [];
+	this.tab = options.tab || '    ';
 
 	createConfItem(this, this, 'nginx');
 	Object.defineProperty(this.nginx, '_root', {
@@ -127,25 +129,39 @@ NginxConfFile.prototype.die = function(file) {
 	return this;
 };
 
-NginxConfFile.create = function(file, encoding, callback) {
+NginxConfFile.prototype.toString = function() {
+	return this.nginx.toString();
+};
+
+NginxConfFile.create = function(file, encoding, options, callback) {
+	if (typeof(options) === 'function') {
+		callback = options;
+		options = null;
+	}
+
 	parser.parseFile(file, encoding || 'utf8', function(err, tree) {
 		if (err) {
 			callback && callback(err);
 			return;
 		}
 
-		callback && callback(null, new NginxConfFile(tree).live(file));
+		callback && callback(null, new NginxConfFile(tree, options).live(file));
 	});
 };
 
-NginxConfFile.createFromSource = function(source, callback) {
+NginxConfFile.createFromSource = function(source, options, callback) {
+	if (typeof(options) === 'function') {
+		callback = options;
+		options = null;
+	}
+
 	parser.parse(source, function(err, tree) {
 		if (err) {
 			callback && callback(err);
 			return;
 		}
 
-		callback && callback(null, new NginxConfFile(tree));
+		callback && callback(null, new NginxConfFile(tree, options));
 	});
 };
 
