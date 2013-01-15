@@ -136,7 +136,7 @@ NginxParser.prototype.setError = function(message) {
 };
 
 NginxParser.prototype.readWord = function() {
-	var result = /(.+?)[\s#;]/.exec(this.source.substring(this.index));
+	var result = /(.+?)[\s#;{}]/.exec(this.source.substring(this.index));
 	this.index += result[1].length;
 	return result[1];
 };

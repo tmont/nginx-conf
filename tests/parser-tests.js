@@ -149,4 +149,56 @@ describe('parser', function() {
 			});
 		});
 	});
+
+	describe('scopes', function() {
+		it('should parse children', function(done) {
+			parser.parse('foo { bar; }', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].children.should.have.length(1);
+				tree.children[0].children[0].should.have.property('name', 'bar');
+				done();
+			});
+		});
+
+		it('should parse siblings with children', function(done) {
+			parser.parse('foo { bar baz; } sibling; foo2 { bar2 baz2; }', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(3);
+
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].children.should.have.length(1);
+				tree.children[0].children[0].should.have.property('name', 'bar');
+				tree.children[0].children[0].should.have.property('value', 'baz');
+
+				tree.children[1].should.have.property('name', 'sibling');
+
+				tree.children[2].should.have.property('name', 'foo2');
+				tree.children[2].children.should.have.length(1);
+				tree.children[2].children[0].should.have.property('name', 'bar2');
+				tree.children[2].children[0].should.have.property('value', 'baz2');
+				done();
+			});
+		});
+
+		it('should parse nested children', function(done) {
+			parser.parse('foo { bar { baz { bat; } } }', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].children.should.have.length(1);
+				tree.children[0].children[0].should.have.property('name', 'bar');
+				tree.children[0].children[0].children.should.have.length(1);
+				tree.children[0].children[0].children[0].should.have.property('name', 'baz');
+				tree.children[0].children[0].children[0].children.should.have.length(1);
+				tree.children[0].children[0].children[0].children[0].should.have.property('name', 'bat');
+				done();
+			});
+		});
+	});
 });
