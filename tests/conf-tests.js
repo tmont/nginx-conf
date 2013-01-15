@@ -28,6 +28,21 @@ describe('configuration editing', function() {
 				done();
 			});
 		});
+
+		it('nodes with same name', function(done) {
+			NginxConfFile.createFromSource('location /foo { bar baz; } location /bar { bat qux; }', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx.should.have.property('location');
+				file.nginx.location.should.be.an.instanceOf(Array);
+				file.nginx.location.should.have.length(2);
+				file.nginx.location[0].should.have.property('bar');
+				file.nginx.location[0].bar.should.have.property('_value', 'baz');
+				file.nginx.location[1].should.have.property('bat');
+				file.nginx.location[1].bat.should.have.property('_value', 'qux');
+				done();
+			});
+		});
 	});
 
 	describe('events', function() {

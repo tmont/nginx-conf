@@ -4,7 +4,7 @@ var parser = require('./parser'),
 	blacklistedNames = { _name: 1, _value: 1, _remove: 1, _add: 1, _getString: 1, _root: 1, toString: 1 };
 
 function createConfItem(file, context, name, value, children) {
-	var newContext = context[name] = {
+	var newContext = {
 		_remove: function(name) {
 			if (!this[name]) {
 				return this;
@@ -28,7 +28,8 @@ function createConfItem(file, context, name, value, children) {
 		_getString: function(depth) {
 			depth = depth || +!this._root;
 			var prefix = new Array(depth).join(file.tab),
-				buffer = prefix + (!this._root ? this._name : '');
+				buffer = prefix + (!this._root ? this._name : ''),
+				i;
 
 			if (this._value) {
 				buffer += ' ' + this._value;
@@ -46,8 +47,15 @@ function createConfItem(file, context, name, value, children) {
 				if (!this._root) {
 					buffer += ' {\n';
 				}
-				for (var i = 0; i < properties.length; i++) {
-					buffer += properties[i]._getString(depth + 1);
+				for (i = 0; i < properties.length; i++) {
+					var prop = properties[i];
+					if (Array.isArray(prop)) {
+						for (var j = 0; j < prop.length; j++) {
+							buffer += prop[j]._getString(depth + 1);
+						}
+					} else {
+						buffer += prop._getString(depth + 1);
+					}
 				}
 				if (!this._root) {
 					buffer += prefix + '}\n';
@@ -86,6 +94,17 @@ function createConfItem(file, context, name, value, children) {
 		value: name,
 		writable: false
 	});
+
+	if (context[name]) {
+		//already exists, create an array or append it to the new one
+		if (!Array.isArray(context[name])) {
+			context[name] = [ context[name] ];
+		}
+
+		context[name].push(newContext);
+	} else {
+		context[name] = newContext;
+	}
 
 	if (children) {
 		for (var i = 0; i < children.length; i++) {
