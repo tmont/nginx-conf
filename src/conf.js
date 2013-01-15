@@ -1,4 +1,5 @@
 var parser = require('./parser'),
+	fs = require('fs'),
 	EventEmitter = require('events').EventEmitter,
 	blacklistedNames = { _name: 1, _value: 1, _remove: 1, _add: 1, _getString: 1, _root: 1, toString: 1 };
 
@@ -97,6 +98,11 @@ function NginxConfFile(tree, options) {
 	options = options || {};
 	this.files = [];
 	this.tab = options.tab || '    ';
+	this.liveListener = (function(file) {
+		return function() {
+			file.flush();
+		};
+	}(this));
 
 	createConfItem(this, this, 'nginx');
 	Object.defineProperty(this.nginx, '_root', {
@@ -115,6 +121,9 @@ NginxConfFile.prototype.__proto__ = EventEmitter.prototype;
 NginxConfFile.prototype.live = function(file) {
 	if (this.files.indexOf(file) === -1) {
 		this.files.push(file);
+		if (this.files.length === 1) {
+			this.on('changed', this.liveListener);
+		}
 	}
 
 	return this;
@@ -124,22 +133,49 @@ NginxConfFile.prototype.die = function(file) {
 	var index = this.files.indexOf(file);
 	if (index !== -1) {
 		this.files.splice(index, 1);
+		if (this.files.length == 0) {
+			this.removeListener('added removed changed', this.liveListener);
+		}
 	}
 
 	return this;
+};
+
+NginxConfFile.prototype.flush = function(callback) {
+	var contents = this.toString(),
+		errors = [],
+		complete = 0,
+		len = this.files.length,
+		confFile = this;
+
+	if (!len) {
+		callback && callback();
+		return;
+	}
+
+	for (var i = 0; i < len; i++) {
+		fs.writeFile(this.files[i], contents, 'utf8', function(err) {
+			err && errors.push(err);
+			complete++;
+			if (complete === len) {
+				confFile.emit('flushed');
+				callback && callback(errors.length ? errors : null);
+			}
+		});
+	}
 };
 
 NginxConfFile.prototype.toString = function() {
 	return this.nginx.toString();
 };
 
-NginxConfFile.create = function(file, encoding, options, callback) {
+NginxConfFile.create = function(file, options, callback) {
 	if (typeof(options) === 'function') {
 		callback = options;
 		options = null;
 	}
 
-	parser.parseFile(file, encoding || 'utf8', function(err, tree) {
+	parser.parseFile(file, 'utf8', function(err, tree) {
 		if (err) {
 			callback && callback(err);
 			return;
