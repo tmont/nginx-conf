@@ -50,22 +50,17 @@ NginxParser.prototype.parseNext = function() {
 
 	switch (c) {
 		case '{':
-			//new context is child of current context
+		case ';':
+			this.context.value = this.context.value.trim();
 			this.context.parent.children.push(this.context);
-			this.context = new NginxParseTreeNode(null, null, this.context);
+
+			//new context is child of current context, or a sibling to the parent
+			this.context = new NginxParseTreeNode(null, null, c === '{' ? this.context : this.context.parent);
 			this.index++;
 			break;
 		case '}':
 			//new context is sibling to the parent
 			this.context = new NginxParseTreeNode(null, null, this.context.parent.parent);
-			this.index++;
-			break;
-		case ';':
-			//current node is complete
-			this.context.parent.children.push(this.context);
-
-			//new context is sibling to current current
-			this.context = new NginxParseTreeNode(null, null, this.context.parent);
 			this.index++;
 			break;
 		case '\n':

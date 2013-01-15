@@ -200,5 +200,20 @@ describe('parser', function() {
 				done();
 			});
 		});
+
+		it('should parse named scope', function(done) {
+			parser.parse('upstream backend { server 127.0.0.1:3000; }', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+
+				tree.children[0].should.have.property('name', 'upstream');
+				tree.children[0].should.have.property('value', 'backend');
+				tree.children[0].children.should.have.length(1);
+				tree.children[0].children[0].should.have.property('name', 'server');
+				tree.children[0].children[0].should.have.property('value', '127.0.0.1:3000');
+				done();
+			});
+		});
 	});
 });
