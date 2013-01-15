@@ -1,0 +1,26 @@
+{
+	"name": "nginx-conf",
+	"version": "0.0.1",
+	"description": "Dynamically update nginx configuration files via programmatic API",
+	"keywords": [ "nginx", "configuration", "parser" ],
+	"directories": {
+		"lib": "src"
+	},
+
+	"author": "Tommy Montgomery <tmont@tmont.com> (http://tmont.com/)",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tmont/nginx-conf.git"
+	},
+
+	"dependencies": {},
+
+	"devDependencies": {
+		"mocha": "1.4.2",
+		"should": "1.1.0"
+	},
+
+	"scripts": {
+		"test": "node_modules/.bin/mocha -R spec ./tests"
+	}
+}
