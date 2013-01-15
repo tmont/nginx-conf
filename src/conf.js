@@ -49,13 +49,13 @@ function createConfItem(file, context, name, value, children) {
 					buffer += properties[i]._getString(depth + 1);
 				}
 				if (!this._root) {
-					buffer += prefix + '}';
+					buffer += prefix + '}\n';
 				}
 			} else if (!this._root) {
-				buffer += ';';
+				buffer += ';\n';
 			}
 
-			return buffer + '\n';
+			return buffer;
 		},
 
 		toString: function() {

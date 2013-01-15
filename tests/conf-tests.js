@@ -156,7 +156,7 @@ describe('configuration editing', function() {
 'foo bar;\n\
 baz {\n\
     bat qux;\n\
-}\n\n';
+}\n';
 
 			actual.should.equal(expected);
 			done();
@@ -172,7 +172,7 @@ baz {\n\
 'foo bar;\n\
 baz {\n\
    bat qux;\n\
-}\n\n';
+}\n';
 
 			actual.should.equal(expected);
 			done();
