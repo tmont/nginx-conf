@@ -65,6 +65,9 @@ NginxParser.prototype.parseNext = function() {
 			break;
 		case '\n':
 		case '\r':
+			if (this.context.value) {
+				this.context.value += c;
+			}
 			this.index++;
 			break;
 		case '\'':

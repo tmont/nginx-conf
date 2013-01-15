@@ -60,6 +60,17 @@ describe('parser', function() {
 				done();
 			});
 		});
+
+		it('should preserve linebreaks in values', function(done) {
+			parser.parse('foo bar\n  baz;', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', 'bar\n  baz');
+				done();
+			});
+		});
 	});
 
 	describe('strings', function() {
