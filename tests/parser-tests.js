@@ -1,5 +1,5 @@
 var should = require('should'),
-	parser = require('../src/parser');
+	parser = require('../');
 
 describe('parser', function() {
 	describe('basic directive parsing', function() {

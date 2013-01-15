@@ -1,5 +1,5 @@
 var should = require('should'),
-	NginxConfFile = require('../src/conf').NginxConfFile,
+	NginxConfFile = require('../').NginxConfFile,
 	fs = require('fs'),
 	path = require('path');
 
@@ -34,18 +34,10 @@ describe('flushing to disk', function() {
 
 	it('via events', function(done) {
 		NginxConfFile.create(tempFile, function(err, file) {
-			if (err) {
-				done(err);
-				return;
-			}
-
+			should.not.exist(err);
 			file.on('flushed', function() {
 				NginxConfFile.create(tempFile, function(err, file) {
-					if (err) {
-						done(err);
-						return;
-					}
-
+					should.not.exist(err);
 					file.nginx.user.should.have.property('_value', 'lollersk8');
 					done();
 				});
@@ -57,18 +49,10 @@ describe('flushing to disk', function() {
 
 	it('manually', function(done) {
 		NginxConfFile.create(tempFile, function(err, file) {
-			if (err) {
-				done(err);
-				return;
-			}
-
+			should.not.exist(err);
 			file.on('flushed', function() {
 				NginxConfFile.create(tempFile, function(err, file) {
-					if (err) {
-						done(err);
-						return;
-					}
-
+					should.not.exist(err);
 					file.nginx.user.should.have.property('_value', 'lollersk8');
 					done();
 				});
@@ -83,21 +67,13 @@ describe('flushing to disk', function() {
 
 	it('should not flush after die()', function(done) {
 		NginxConfFile.create(tempFile, function(err, file) {
-			if (err) {
-				done(err);
-				return;
-			}
-
+			should.not.exist(err);
 			file.die(tempFile);
 			file.nginx.user._value = 'lollersk8';
 
 			process.nextTick(function() {
 				NginxConfFile.create(tempFile, function(err, file) {
-					if (err) {
-						done(err);
-						return;
-					}
-
+					should.not.exist(err);
 					//should not have changed
 					file.nginx.user.should.have.property('_value', 'www www');
 					done();
