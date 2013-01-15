@@ -13,8 +13,6 @@
 		"url": "https://github.com/tmont/nginx-conf.git"
 	},
 
-	"dependencies": {},
-
 	"devDependencies": {
 		"mocha": "1.8.1",
 		"should": "1.2.1"
