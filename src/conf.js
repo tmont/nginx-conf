@@ -1,12 +1,74 @@
-var parseFile = require('./parser').parseFile,
-	EventEmitter = require('events').EventEmitter;
+var parser = require('./parser'),
+	EventEmitter = require('events').EventEmitter,
+	blacklistedNames = { _name: 1, _value: 1, _remove: 1, _add: 1, _getString: 1, _root: 1, toString: 1 };
 
-function createConfItem(file, context, name, value) {
-	context[name] = {
-		get value() {
+function createConfItem(file, context, name, value, children) {
+	var newContext = context[name] = {
+		_remove: function(name) {
+			if (!this[name]) {
+				return this;
+			}
+
+			delete this[name];
+			file.emit('removed', this, name);
+			return this;
+		},
+
+		_add: function(name, value, children) {
+			if (blacklistedNames[name]) {
+				throw new Error('The name "' + name + '" is reserved');
+			}
+
+			createConfItem(file, context, name, value, children);
+			file.emit('added', context, name);
+			return this;
+		},
+
+		_getString: function(depth) {
+			depth = depth || +!this._root;
+			var prefix = new Array(depth).join('  '),
+				buffer = prefix + (!this._root ? this._name : '');
+
+			if (this._value) {
+				buffer += ' ' + this._value;
+			}
+
+			var properties = Object.keys(this)
+				.filter(function(key) {
+					return typeof(this[key]) !== 'function';
+				})
+				.map(function(key) {
+					return this[key];
+				});
+
+			if (properties.length) {
+				if (!this._root) {
+					buffer += ' {\n';
+				}
+				for (var i = 0; i < properties.length; i++) {
+					buffer += properties[i]._getString(depth + 1);
+				}
+				if (!this._root) {
+					buffer += prefix + '}';
+				}
+			} else if (!this._root) {
+				buffer += ';';
+			}
+
+			return buffer + '\n';
+		},
+
+		toString: function() {
+			return this._getString(1);
+		}
+	};
+
+	Object.defineProperty(newContext, '_value', {
+		enumerable: false,
+		get: function() {
 			return value;
 		},
-		set value(newValue) {
+		set: function(newValue) {
 			newValue = newValue.toString();
 			if (value === newValue) {
 				return;
@@ -14,61 +76,35 @@ function createConfItem(file, context, name, value) {
 
 			var oldValue = value;
 			value = newValue;
-			file.emit('changed', context, name, value, oldValue);
-		},
-
-		get name() {
-			return name;
-		},
-
-		remove: function() {
-			delete context[name];
-			file.emit('removed', context, name);
-		},
-
-		add: function(name, value) {
-			createConfItem(file, context, name, value);
-			file.emit('added', context, name);
-			return this;
-		},
-
-		toString: function() {
-			return this.getString(1);
-		},
-
-		getString: function(depth) {
-			depth = depth || 1;
-			var prefix = new Array(depth).join('  '),
-				buffer = prefix + this.name;
-
-			if (!this.value) {
-				buffer += ';';
-			} else if (typeof(this.value) === 'object') {
-				buffer += ' {\n';
-				for (var key in Object.keys(this.value)) {
-					buffer += this.value[key].getString(depth + 1);
-				}
-				buffer += prefix + '}';
-			} else {
-				buffer += ' ' + this.value + ';';
-			}
-
-			return buffer + '\n';
+			file.emit('changed', newContext, oldValue);
 		}
-	};
+	});
 
-	if (typeof(value) === 'object') {
-		value = createConfItem(file, context[name], value);
+	Object.defineProperty(newContext, '_name', {
+		enumerable: false,
+		value: name,
+		writable: false
+	});
+
+	if (children) {
+		for (var i = 0; i < children.length; i++) {
+			createConfItem(file, newContext, children[i].name, children[i].value, children[i].children);
+		}
 	}
 }
 
 function NginxConfFile(tree) {
-	this.nginx = {};
 	this.files = [];
 
-	for (var i = 0; i < tree.nodes.length; i++) {
-		var node = tree.nodes[i];
-		createConfItem(this, this.nginx, node.name, node.value);
+	createConfItem(this, this, 'nginx');
+	Object.defineProperty(this.nginx, '_root', {
+		writable: false,
+		value: true,
+		enumerable: false
+	});
+	for (var i = 0; i < tree.children.length; i++) {
+		var node = tree.children[i];
+		createConfItem(this, this.nginx, node.name, node.value, node.children);
 	}
 }
 
@@ -91,14 +127,26 @@ NginxConfFile.prototype.die = function(file) {
 	return this;
 };
 
-NginxConfFile.create = function(file, options, callback) {
-	options = options || {};
-	parseFile(file, options.encoding || 'utf8', function(err, tree) {
+NginxConfFile.create = function(file, encoding, callback) {
+	parser.parseFile(file, encoding || 'utf8', function(err, tree) {
 		if (err) {
 			callback && callback(err);
 			return;
 		}
 
-		callback && callback(new NginxConfFile(tree).live(file));
+		callback && callback(null, new NginxConfFile(tree).live(file));
 	});
 };
+
+NginxConfFile.createFromSource = function(source, callback) {
+	parser.parse(source, function(err, tree) {
+		if (err) {
+			callback && callback(err);
+			return;
+		}
+
+		callback && callback(null, new NginxConfFile(tree));
+	});
+};
+
+exports.NginxConfFile = NginxConfFile;
