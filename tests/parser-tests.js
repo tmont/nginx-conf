@@ -60,16 +60,6 @@ describe('parser', function() {
 				done();
 			});
 		});
-
-		it('should err when missing semicolon', function(done) {
-			parser.parse('foo', function(err, tree) {
-				should.exist(err);
-				err.should.have.property('line', 1);
-				err.should.have.property('index', 0);
-				err.should.have.property('message', 'Unable to read value (are you missing a semicolon?)');
-				done();
-			});
-		});
 	});
 
 	describe('strings', function() {
@@ -133,6 +123,28 @@ describe('parser', function() {
 				err.should.have.property('line', 1);
 				err.should.have.property('index', 0);
 				err.should.have.property('message', 'Found a string but expected a directive');
+				done();
+			});
+		});
+	});
+
+	describe('comments', function() {
+		it('should ignore comments on their own line', function(done) {
+			parser.parse('# comment\nfoo;', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				done();
+			});
+		});
+
+		it('should ignore comments on same line as directive', function(done) {
+			parser.parse('foo; # comment', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
 				done();
 			});
 		});
