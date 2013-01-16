@@ -224,35 +224,57 @@ describe('configuration editing', function() {
 		});
 	});
 
-	it('should convert to an nginx-compatible string', function(done) {
-		NginxConfFile.createFromSource('foo bar; baz { bat qux; }', function(err, file) {
-			should.not.exist(err);
-			should.exist(file);
-			var actual = file.toString();
-			var expected =
+	describe('converting to nginx-compatible string', function() {
+		it('should convert to an nginx-compatible string', function(done) {
+			NginxConfFile.createFromSource('foo bar; baz { bat qux; }', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				var actual = file.toString();
+				var expected =
 'foo bar;\n\
 baz {\n\
     bat qux;\n\
 }\n';
 
-			actual.should.equal(expected);
-			done();
+				actual.should.equal(expected);
+				done();
+			});
 		});
-	});
 
-	it('should convert to an nginx-compatible string with custom TAB', function(done) {
-		NginxConfFile.createFromSource('foo bar; baz { bat qux; }', { tab: '   ' }, function(err, file) {
-			should.not.exist(err);
-			should.exist(file);
-			var actual = file.toString();
-			var expected =
+		it('should convert to an nginx-compatible string with custom TAB', function(done) {
+			NginxConfFile.createFromSource('foo bar; baz { bat qux; }', { tab: '  ' }, function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				var actual = file.toString();
+				var expected =
 'foo bar;\n\
 baz {\n\
-   bat qux;\n\
+  bat qux;\n\
 }\n';
 
-			actual.should.equal(expected);
-			done();
+				actual.should.equal(expected);
+				done();
+			});
+		});
+
+		it('should handle directives with the same name', function(done) {
+			NginxConfFile.createFromSource('foo bar; location { meh; } location { meep; } foo bat;', { tab: '  ' }, function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				var actual = file.toString();
+				var expected =
+'foo bar;\n\
+foo bat;\n\
+location {\n\
+  meh;\n\
+}\n\
+location {\n\
+  meep;\n\
+}\n';
+
+				actual.should.equal(expected);
+				done();
+			});
 		});
 	});
 });
