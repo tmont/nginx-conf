@@ -51,13 +51,11 @@ describe('configuration editing', function() {
 				should.not.exist(err);
 				should.exist(file);
 				var count = 0;
-				file.on('added', function(context, name) {
+				file.on('added', function(node) {
 					count++;
-					should.exist(context);
-					should.exist(name);
-					name.should.equal('baz');
-					context.should.have.property(name);
-					context[name].should.have.property('_value', 'bat');
+					should.exist(node);
+					node.should.have.property('_name', 'baz');
+					node.should.have.property('_value', 'bat');
 				});
 				file.nginx.should.have.property('foo');
 				file.nginx._add('baz', 'bat');
@@ -71,12 +69,11 @@ describe('configuration editing', function() {
 				should.not.exist(err);
 				should.exist(file);
 				var count = 0;
-				file.on('removed', function(context, name) {
+				file.on('removed', function(node) {
 					count++;
-					should.exist(context);
-					should.exist(name);
-					name.should.equal('foo');
-					context.should.not.have.property(name);
+					should.exist(node);
+					node.should.have.property('_name', 'foo');
+					node.should.have.property('_value', 'bar');
 				});
 				file.nginx.should.have.property('foo');
 				file.nginx._remove('foo');
@@ -160,6 +157,71 @@ describe('configuration editing', function() {
 				});
 			}(name));
 		}
+
+		it('should create an array for multiple items', function(done) {
+			NginxConfFile.createFromSource('foo bar;', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx.should.have.property('foo');
+				file.nginx.foo.should.have.property('_value', 'bar');
+				file.nginx._add('foo', 'baz');
+				file.nginx._add('foo', 'bat');
+
+				file.nginx.foo.should.be.an.instanceOf(Array);
+				file.nginx.foo.should.have.length(3);
+				file.nginx.foo[0].should.have.property('_value', 'bar');
+				file.nginx.foo[1].should.have.property('_value', 'baz');
+				file.nginx.foo[2].should.have.property('_value', 'bat');
+				done();
+			});
+		});
+
+		it('should remove first item when index is not given', function(done) {
+			NginxConfFile.createFromSource('foo bar; foo baz; foo bat;', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx.should.have.property('foo');
+				file.nginx.foo.should.be.an.instanceOf(Array);
+				file.nginx.foo.should.have.length(3);
+
+				file.nginx._remove('foo');
+				file.nginx.foo.should.have.length(2);
+				file.nginx.foo[0].should.have.property('_value', 'baz');
+				file.nginx.foo[1].should.have.property('_value', 'bat');
+				done();
+			});
+		});
+
+		it('should remove item at index', function(done) {
+			NginxConfFile.createFromSource('foo bar; foo baz; foo bat;', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx.should.have.property('foo');
+				file.nginx.foo.should.be.an.instanceOf(Array);
+				file.nginx.foo.should.have.length(3);
+
+				file.nginx._remove('foo', 1);
+				file.nginx.foo.should.have.length(2);
+				file.nginx.foo[0].should.have.property('_value', 'bar');
+				file.nginx.foo[1].should.have.property('_value', 'bat');
+				done();
+			});
+		});
+
+		it('should flatten array into property when only one item remains', function(done) {
+			NginxConfFile.createFromSource('foo bar; foo baz;', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx.should.have.property('foo');
+				file.nginx.foo.should.be.an.instanceOf(Array);
+				file.nginx.foo.should.have.length(2);
+
+				file.nginx._remove('foo', 0);
+				file.nginx.foo.should.not.be.an.instanceOf(Array);
+				file.nginx.foo.should.have.property('_value', 'baz');
+				done();
+			});
+		});
 	});
 
 	it('should convert to an nginx-compatible string', function(done) {

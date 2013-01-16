@@ -5,13 +5,28 @@ var parser = require('./parser'),
 
 function createConfItem(file, context, name, value, children) {
 	var newContext = {
-		_remove: function(name) {
+		_remove: function(name, index) {
+			index = Math.max(index || 0, 0);
 			if (!this[name]) {
 				return this;
 			}
 
-			delete this[name];
-			file.emit('removed', this, name);
+			var node = this[name];
+			if (Array.isArray(this[name])) {
+				if (this[name][index]) {
+					node = this[name][index];
+					this[name].splice(index, 1);
+					if (this[name].length === 1) {
+						this[name] = this[name][0];
+					}
+					file.emit('removed', node);
+				}
+			} else {
+				node = this[name];
+				delete this[name];
+				file.emit('removed', node);
+			}
+
 			return this;
 		},
 
@@ -20,8 +35,8 @@ function createConfItem(file, context, name, value, children) {
 				throw new Error('The name "' + name + '" is reserved');
 			}
 
-			createConfItem(file, context, name, value, children);
-			file.emit('added', context, name);
+			var node = createConfItem(file, newContext, name, value, children);
+			file.emit('added', node);
 			return this;
 		},
 
@@ -103,6 +118,7 @@ function createConfItem(file, context, name, value, children) {
 
 		context[name].push(newContext);
 	} else {
+		//console.log(require('util').inspect(context, false, null, true));
 		context[name] = newContext;
 	}
 
@@ -111,12 +127,15 @@ function createConfItem(file, context, name, value, children) {
 			createConfItem(file, newContext, children[i].name, children[i].value, children[i].children);
 		}
 	}
+
+	return newContext;
 }
 
 function NginxConfFile(tree, options) {
 	options = options || {};
 	this.files = [];
 	this.tab = options.tab || '    ';
+	this._name = 'NginxConfFile';
 	this.liveListener = (function(file) {
 		return function() {
 			file.flush();
