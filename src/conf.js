@@ -159,6 +159,8 @@ NginxConfFile.prototype.live = function(file) {
 	if (this.files.indexOf(file) === -1) {
 		this.files.push(file);
 		if (this.files.length === 1) {
+			this.on('added', this.liveListener);
+			this.on('removed', this.liveListener);
 			this.on('changed', this.liveListener);
 		}
 	}
