@@ -43,6 +43,44 @@ describe('configuration editing', function() {
 				done();
 			});
 		});
+
+		it('adding comments', function(done) {
+			NginxConfFile.createFromSource('foo bar;', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx.should.have.property('foo');
+				file.nginx.foo._comments.should.have.length(0);
+				file.nginx.foo._comments.push('new comment');
+				file.nginx.foo._comments.should.have.length(1);
+				done();
+			});
+		});
+
+		it('removing comments', function(done) {
+			NginxConfFile.createFromSource('#comment\nfoo bar;', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx.should.have.property('foo');
+				file.nginx.foo._comments.should.have.length(1);
+				file.nginx.foo._comments[0].should.equal('comment');
+				file.nginx.foo._comments.splice(0, 1);
+				file.nginx.foo._comments.should.have.length(0);
+				done();
+			});
+		});
+
+		it('updating comments', function(done) {
+			NginxConfFile.createFromSource('#comment\nfoo bar;', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx.should.have.property('foo');
+				file.nginx.foo._comments.should.have.length(1);
+				file.nginx.foo._comments[0].should.equal('comment');
+				file.nginx.foo._comments[0] = 'changed';
+				file.nginx.foo._comments[0].should.equal('changed');
+				done();
+			});
+		});
 	});
 
 	describe('events', function() {
@@ -133,7 +171,7 @@ describe('configuration editing', function() {
 	});
 
 	describe('adding and removing nodes', function() {
-		var blacklist = { _name: 1, _value: 1, _remove: 1, _add: 1, _getString: 1, _root: 1, toString: 1 };
+		var blacklist = { _name: 1, _value: 1, _remove: 1, _add: 1, _getString: 1, _root: 1, toString: 1, _comments: 1 };
 		for (var name in blacklist) {
 			(function(name) {
 				it('should not allow adding a node name "' + name + '"', function(done) {
@@ -271,6 +309,21 @@ location {\n\
 location {\n\
   meep;\n\
 }\n';
+
+				actual.should.equal(expected);
+				done();
+			});
+		});
+
+		it('should output comments above directive regardless of original position', function(done) {
+			NginxConfFile.createFromSource('# first\nfoo # second\nbar;', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				var actual = file.toString();
+				var expected =
+'# first\n\
+# second\n\
+foo bar;\n';
 
 				actual.should.equal(expected);
 				done();

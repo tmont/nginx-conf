@@ -1,8 +1,16 @@
 var parser = require('./parser'),
 	fs = require('fs'),
-	blacklistedNames = { _name: 1, _value: 1, _remove: 1, _add: 1, _getString: 1, _root: 1, toString: 1 };
+	blacklistedNames = {
+		_name: 1, _value: 1, _remove: 1, _add: 1,
+		_getString: 1, _root: 1, toString: 1, _comments: 1
+	};
 
-function createConfItem(file, context, name, value, children) {
+function createConfItem(file, context, node) {
+	var name = node.name,
+		value = node.value,
+		children = node.children,
+		comments = node.comments || [];
+
 	var newContext = {
 		_remove: function(name, index) {
 			index = Math.max(index || 0, 0);
@@ -29,12 +37,17 @@ function createConfItem(file, context, name, value, children) {
 			return this;
 		},
 
-		_add: function(name, value, children) {
+		_add: function(name, value, children, comments) {
 			if (blacklistedNames[name]) {
 				throw new Error('The name "' + name + '" is reserved');
 			}
 
-			var node = createConfItem(file, newContext, name, value, children);
+			var node = createConfItem(file, newContext, {
+				name: name,
+				value: value,
+				children: children,
+				comments: comments
+			});
 			file.emit('added', node);
 			return this;
 		},
@@ -42,8 +55,16 @@ function createConfItem(file, context, name, value, children) {
 		_getString: function(depth) {
 			depth = depth || +!this._root;
 			var prefix = new Array(depth).join(file.tab),
-				buffer = prefix + (!this._root ? this._name : ''),
+				buffer = '',
 				i;
+
+			if (this._comments.length) {
+				for (i = 0; i < this._comments.length; i++) {
+					buffer += '#' + this._comments[i] + '\n';
+				}
+			}
+
+			buffer += prefix + (!this._root ? this._name : '');
 
 			if (this._value) {
 				buffer += ' ' + this._value;
@@ -109,6 +130,12 @@ function createConfItem(file, context, name, value, children) {
 		writable: false
 	});
 
+	Object.defineProperty(newContext, '_comments', {
+		enumerable: false,
+		value: comments,
+		writable: false
+	});
+
 	if (context[name]) {
 		//already exists, create an array or append it to the new one
 		if (!Array.isArray(context[name])) {
@@ -123,7 +150,7 @@ function createConfItem(file, context, name, value, children) {
 
 	if (children) {
 		for (var i = 0; i < children.length; i++) {
-			createConfItem(file, newContext, children[i].name, children[i].value, children[i].children);
+			createConfItem(file, newContext, children[i]);
 		}
 	}
 
@@ -141,7 +168,7 @@ function NginxConfFile(tree, options) {
 		};
 	}(this));
 
-	createConfItem(this, this, 'nginx');
+	createConfItem(this, this, { name: 'nginx' });
 	Object.defineProperty(this.nginx, '_root', {
 		writable: false,
 		value: true,
@@ -149,7 +176,7 @@ function NginxConfFile(tree, options) {
 	});
 	for (var i = 0; i < tree.children.length; i++) {
 		var node = tree.children[i];
-		createConfItem(this, this.nginx, node.name, node.value, node.children);
+		createConfItem(this, this.nginx, node);
 	}
 }
 

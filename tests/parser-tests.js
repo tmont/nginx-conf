@@ -278,4 +278,58 @@ describe('parser', function() {
 			});
 		});
 	});
+
+	describe('comments', function() {
+		it('should attach comments before directive to current node', function(done) {
+			parser.parse('# this is a comment\nfoo bar;', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', 'bar');
+				tree.children[0].comments.should.have.length(1);
+				tree.children[0].comments[0].should.equal(' this is a comment');
+				done();
+			});
+		});
+
+		it('should attach multiple comments to current node', function(done) {
+			parser.parse('# this is a comment\n#another comment\nfoo bar;', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', 'bar');
+				tree.children[0].comments.should.have.length(2);
+				tree.children[0].comments[0].should.equal(' this is a comment');
+				tree.children[0].comments[1].should.equal('another comment');
+				done();
+			});
+		});
+
+		it('should attach comment in middle of directive to current node', function(done) {
+			parser.parse('foo # this is a comment\nbar;', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', 'bar');
+				tree.children[0].comments.should.have.length(1);
+				tree.children[0].comments[0].should.equal(' this is a comment');
+				done();
+			});
+		});
+
+		it('should ignore comments at end of source', function(done) {
+			parser.parse('foo bar; # this is a comment', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', 'bar');
+				tree.children[0].comments.should.have.length(0);
+				done();
+			});
+		});
+	});
 });

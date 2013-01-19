@@ -5,6 +5,7 @@ function NginxParseTreeNode(name, value, parent, children) {
 	this.value = value || '';
 	this.parent = parent || null;
 	this.children = children || [];
+	this.comments = [];
 }
 
 function NginxParser() {
@@ -69,7 +70,7 @@ NginxParser.prototype.parseNext = function() {
 			this.context.value += this.readString();
 			break;
 		case '#':
-			this.readComment();
+			this.context.comments.push(this.readComment());
 			break;
 		default:
 			value = this.readWord();
@@ -135,7 +136,7 @@ NginxParser.prototype.readWord = function() {
 NginxParser.prototype.readComment = function() {
 	var result = /(.*?)(?:\r\n|\n|$)/.exec(this.source.substring(this.index));
 	this.index += result ? result[0].length : 0;
-	return result;
+	return result[1].substring(1); //ignore # character
 };
 
 NginxParser.prototype.parseFile = function(file, encoding, callback) {

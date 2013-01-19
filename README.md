@@ -71,8 +71,58 @@ NginxConfFile.create('/etc/nginx.conf', function(err, conf) {
 });
 ```
 
+### Comments
+Support for comments is supported-ish. Comments are attached to directives, and will always
+be rendered *above* the directive when using `toString()` (or `_getString()`).
+
+Comments can be added, removed and updated via the `_comments` array on a node.
+
+```javascript
+console.log(conf.nginx.events.use._comments.length); // 1
+console.log(conf.nginx.events.use._comments[0]); // use [ kqueue | rtsig | epoll | /dev/poll | select | poll ];
+
+//remove the comment
+conf.nginx.events.use._comments.splice(0, 1);
+
+//add a new one
+conf.nginx.event.use._comments.push('my new comment');
+console.log(conf.nginx.events.use._comments.length); // 1
+console.log(conf.nginx.events.use._comments[0]); //my new comment
+
+//update a comment's text
+conf.nginx.event.use._comments[0] = 'updated';
+console.log(conf.nginx.events.use._comments[0]); //updated
+```
+
+If the comment is in a weird place (like in the middle of a directive), it'll still be
+attached to the node. If it's *after* the directive (after the semicolon or closing brace),
+it will be attached to the *next* node, or ignored if it's at the end of the file.
+
+Assuming this nginx configuration:
+```
+foo #comment
+bar;
+```
+
+You will have this object structure:
+```javascript
+console.log(conf.nginx.foo._value); //bar
+console.log(conf.nginx.foo._comments[0]); //comment
+```
+
+But if the comment comes *after*:
+```
+foo bar;
+#comment
+```
+
+```javascript
+console.log(conf.nginx.foo._value); //bar
+console.log(conf.nginx.foo._comments.length); //0
+```
+
 ## Development
-```bash
+```
 git clone git@github.com:tmont/nginx-conf.git
 cd nginx-conf
 npm install
