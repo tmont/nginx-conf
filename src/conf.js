@@ -179,22 +179,22 @@ NginxConfFile.prototype.die = function(file) {
 };
 
 NginxConfFile.prototype.flush = function(callback) {
-	var contents = this.toString(),
-		errors = [],
-		complete = 0,
-		len = this.files.length,
-		confFile = this;
-
-	if (!len) {
+	if (!this.files.length) {
 		callback && callback();
 		return;
 	}
 
+	var contents = this.toString(),
+		len = this.files.length,
+		confFile = this,
+		errors = [],
+		completed = 0;
+
 	for (var i = 0; i < len; i++) {
 		fs.writeFile(this.files[i], contents, 'utf8', function(err) {
 			err && errors.push(err);
-			complete++;
-			if (complete === len) {
+			completed++;
+			if (completed === len) {
 				confFile.emit('flushed');
 				callback && callback(errors.length ? errors : null);
 			}
