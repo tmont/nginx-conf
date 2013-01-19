@@ -1,6 +1,5 @@
 var parser = require('./parser'),
 	fs = require('fs'),
-	EventEmitter = require('events').EventEmitter,
 	blacklistedNames = { _name: 1, _value: 1, _remove: 1, _add: 1, _getString: 1, _root: 1, toString: 1 };
 
 function createConfItem(file, context, name, value, children) {
@@ -154,7 +153,7 @@ function NginxConfFile(tree, options) {
 	}
 }
 
-NginxConfFile.prototype.__proto__ = EventEmitter.prototype;
+NginxConfFile.prototype.__proto__ = require('events').EventEmitter.prototype;
 
 NginxConfFile.prototype.live = function(file) {
 	if (this.files.indexOf(file) === -1) {
