@@ -15,8 +15,9 @@ function copyFile(callback) {
 	readStream.pipe(writeStream);
 }
 
+
 describe('flushing to disk', function() {
-	var tempFile;
+	var tempFile, backupFile;
 	beforeEach(function(done) {
 		copyFile(function(err, temp) {
 			tempFile = temp;
@@ -26,10 +27,13 @@ describe('flushing to disk', function() {
 
 	afterEach(function(done) {
 		if (tempFile) {
-			fs.unlink(tempFile, done);
-		} else {
-			done();
+			fs.unlinkSync(tempFile);
 		}
+		if (backupFile) {
+			fs.unlinkSync(backupFile);
+		}
+
+		done();
 	});
 
 	it('when node value changes', function(done) {
@@ -147,6 +151,24 @@ describe('flushing to disk', function() {
 				flushed.should.equal(false, 'should not have triggered flushed event');
 				done();
 			}, 100);
+		});
+	});
+
+	it('should create a new file if one does not already exist', function(done) {
+		backupFile = __dirname + '/files/backup_test.conf';
+		NginxConfFile.createFromSource('foo bar;', function(err, file) {
+			should.not.exist(err);
+			file.on('flushed', function() {
+				fs.readFile(backupFile, 'utf8', function(err, contents) {
+					should.not.exist(err);
+					should.exist(contents);
+					contents.should.equal('foo lollersk8;\n');
+					done();
+				});
+			});
+
+			file.live(backupFile);
+			file.nginx.foo._value = 'lollersk8';
 		});
 	});
 });
