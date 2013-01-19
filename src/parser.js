@@ -135,6 +135,10 @@ NginxParser.prototype.setError = function(message) {
 
 NginxParser.prototype.readWord = function() {
 	var result = /(.+?)[\s#;{}]/.exec(this.source.substring(this.index));
+	if (!result) {
+		this.setError('Word not terminated. Are you missing a semicolon?');
+		return '';
+	}
 	this.index += result[1].length;
 	return result[1];
 };

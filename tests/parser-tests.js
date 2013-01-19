@@ -227,4 +227,55 @@ describe('parser', function() {
 			});
 		});
 	});
+
+	describe('invalid and weird syntax', function() {
+		it('directive not terminated with ";"', function(done) {
+			parser.parse('foo', function(err) {
+				should.exist(err);
+				err.should.have.property('message', 'Word not terminated. Are you missing a semicolon?');
+				done();
+			});
+		});
+
+		it('directive value not terminated with ";"', function(done) {
+			parser.parse('foo bar', function(err) {
+				should.exist(err);
+				err.should.have.property('message', 'Word not terminated. Are you missing a semicolon?');
+				done();
+			});
+		});
+
+		it('directive semicolon after comment', function(done) {
+			parser.parse('foo # comment\n bar;', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', 'bar');
+				tree.children[0].children.should.have.length(0);
+				done();
+			});
+		});
+
+		it('directive opening brace after comment', function(done) {
+			parser.parse('foo # comment\n { bar; }', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', '');
+				tree.children[0].children.should.have.length(1);
+				tree.children[0].children[0].should.have.property('name', 'bar');
+				tree.children[0].children[0].should.have.property('value', '');
+				done();
+			});
+		});
+
+		it('missing closing brace should not throw', function(done) {
+			parser.parse('foo { bar;', function(err) {
+				should.not.exist(err);
+				done();
+			});
+		});
+	});
 });
