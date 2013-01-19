@@ -132,7 +132,7 @@ describe('configuration editing', function() {
 		});
 	});
 
-	describe('adding nodes', function() {
+	describe('adding and removing nodes', function() {
 		var blacklist = { _name: 1, _value: 1, _remove: 1, _add: 1, _getString: 1, _root: 1, toString: 1 };
 		for (var name in blacklist) {
 			(function(name) {
