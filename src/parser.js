@@ -7,17 +7,6 @@ function NginxParseTreeNode(name, value, parent, children) {
 	this.children = children || [];
 }
 
-NginxParseTreeNode.prototype = {
-	hasChildren: function() {
-		return !!this.children.length;
-	},
-
-	isRoot: function() {
-		return !this.parent;
-	}
-};
-
-
 function NginxParser() {
 	this.source = '';
 	this.index = -1;
