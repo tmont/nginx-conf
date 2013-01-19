@@ -6,6 +6,9 @@ by [Tommy Montgomery](http://tmont.com)
 `nginx-conf` is a node module for making changes to an [nginx](http://nginx.org) configuration
 file programmatically.
 
+## Installation
+`npm install nginx-conf`
+
 ## Usage
 Pretend you have an nginx config file like
 [this one](https://github.com/tmont/nginx-conf/blob/master/tests/files/nginx-home.conf).
