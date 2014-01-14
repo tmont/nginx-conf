@@ -26,7 +26,7 @@ NginxParser.prototype.parse = function(source, callback) {
 	do {
 		this.parseNext();
 		if (this.error) {
-			callback && callback(this.error);
+			callback && callback(this.error, this.tree);
 			return;
 		}
 	} while (this.index < this.source.length);
@@ -124,7 +124,7 @@ NginxParser.prototype.setError = function(message) {
 };
 
 NginxParser.prototype.readWord = function() {
-	var result = /(.+?)[\s#;{}]/.exec(this.source.substring(this.index));
+	var result = /^(.+?)[\s#;{}'"]/.exec(this.source.substring(this.index));
 	if (!result) {
 		this.setError('Word not terminated. Are you missing a semicolon?');
 		return '';

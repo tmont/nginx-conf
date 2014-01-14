@@ -148,6 +148,18 @@ describe('parser', function() {
 				done();
 			});
 		});
+
+		it('should handle multiple values with string that starts with opening curly bracket', function(done) {
+			//edge case found after trying to parse a logstash_json log_format
+			parser.parse('foo bar \'{\';', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', 'bar \'{\'');
+				done();
+			});
+		});
 	});
 
 	describe('scopes', function() {

@@ -329,5 +329,16 @@ foo bar;\n';
 				done();
 			});
 		});
+
+		it('should handle line breaks and consecutive strings', function(done) {
+			var source = 'foo bar \'{\'\n  \'"foo": "bar"\'\n\'}\';';
+			NginxConfFile.createFromSource(source, function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				var actual = file.toString();
+				actual.should.equal(source + '\n');
+				done();
+			});
+		});
 	});
 });
