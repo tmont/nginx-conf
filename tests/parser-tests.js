@@ -139,28 +139,6 @@ describe('parser', function() {
 		});
 	});
 
-	describe('comments', function() {
-		it('should ignore comments on their own line', function(done) {
-			parser.parse('# comment\nfoo;', function(err, tree) {
-				should.not.exist(err);
-				should.exist(tree);
-				tree.children.should.have.length(1);
-				tree.children[0].should.have.property('name', 'foo');
-				done();
-			});
-		});
-
-		it('should ignore comments on same line as directive', function(done) {
-			parser.parse('foo; # comment', function(err, tree) {
-				should.not.exist(err);
-				should.exist(tree);
-				tree.children.should.have.length(1);
-				tree.children[0].should.have.property('name', 'foo');
-				done();
-			});
-		});
-	});
-
 	describe('scopes', function() {
 		it('should parse children', function(done) {
 			parser.parse('foo { bar; }', function(err, tree) {
@@ -280,6 +258,26 @@ describe('parser', function() {
 	});
 
 	describe('comments', function() {
+		it('should ignore comments on their own line', function(done) {
+			parser.parse('# comment\nfoo;', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				done();
+			});
+		});
+
+		it('should ignore comments on same line as directive', function(done) {
+			parser.parse('foo; # comment', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				done();
+			});
+		});
+
 		it('should attach comments before directive to current node', function(done) {
 			parser.parse('# this is a comment\nfoo bar;', function(err, tree) {
 				should.not.exist(err);
