@@ -1,6 +1,4 @@
 #nginx-conf
-by [Tommy Montgomery](http://tmont.com)
-
 [![Build Status](https://travis-ci.org/tmont/nginx-conf.png)](https://travis-ci.org/tmont/nginx-conf)
 
 `nginx-conf` is a node module for making changes to an [nginx](http://nginx.org) configuration
