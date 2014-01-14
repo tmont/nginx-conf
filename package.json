@@ -14,9 +14,9 @@
 	},
 
 	"devDependencies": {
-		"mocha": "1.15.1",
+		"mocha": "1.17.0",
 		"should": "2.1.1",
-		"istanbul": "0.1.46"
+		"istanbul": "0.2.3"
 	},
 
 	"scripts": {
