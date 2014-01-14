@@ -137,6 +137,17 @@ describe('parser', function() {
 				done();
 			});
 		});
+
+		it('should handle consecutive strings', function(done) {
+			parser.parse('foo "bar" "baz";', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', '"bar" "baz"');
+				done();
+			});
+		});
 	});
 
 	describe('scopes', function() {
