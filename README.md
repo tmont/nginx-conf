@@ -60,7 +60,7 @@ NginxConfFile.create('/etc/nginx.conf', function(err, conf) {
 
   conf.nginx.http._add('add_header', 'X-Load-Balancer lb-01');
   conf.nginx.http._add('add_header', 'X-Secure true');
-  console.log(conf.nginx.http.add_header[0]._value); //max-age=315360000, public
+  console.log(conf.nginx.http.add_header[0]._value); //Cache-Control max-age=315360000, public
   console.log(conf.nginx.http.add_header[1]._value); //X-Load-Balancer lb-01
   console.log(conf.nginx.http.add_header[2]._value); //X-Secure true
 
