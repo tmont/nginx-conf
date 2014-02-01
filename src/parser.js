@@ -38,6 +38,10 @@ NginxParser.prototype.parseNext = function() {
 	var c = this.source.charAt(this.index),
 		value;
 
+	if (!c) {
+		return;
+	}
+
 	switch (c) {
 		case '{':
 		case ';':
