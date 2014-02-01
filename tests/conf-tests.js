@@ -210,6 +210,22 @@ describe('configuration editing', function() {
 			});
 		});
 
+		it('should add new block to existing blocks', function(done) {
+			NginxConfFile.createFromSource('server {}', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx.should.have.property('server');
+				file.nginx._add('server');
+
+				file.nginx.server.should.be.instanceOf(Array);
+				file.nginx.server[1]._add('foo', 'bar');
+				file.nginx.server[0].should.not.have.property('foo');
+				file.nginx.server[1].should.have.property('foo');
+				file.nginx.server[1].foo.should.have.property('_value', 'bar');
+				done();
+			});
+		});
+
 		it('should create an array for multiple items', function(done) {
 			NginxConfFile.createFromSource('foo bar;', function(err, file) {
 				should.not.exist(err);
