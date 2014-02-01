@@ -144,7 +144,6 @@ function createConfItem(file, context, node) {
 
 		context[name].push(newContext);
 	} else {
-		//console.log(require('util').inspect(context, false, null, true));
 		context[name] = newContext;
 	}
 
