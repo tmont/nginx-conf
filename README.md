@@ -70,6 +70,30 @@ NginxConfFile.create('/etc/nginx.conf', function(err, conf) {
   //if there's only one directive with a name, it is always flattened into a property
   console.log(conf.nginx.http.add_header._value); //X-Load-Balancer lb-01
   console.log(conf.nginx.http.add_header[0]); //undefined
+
+  //adding a new block
+  conf.nginx.http._add('server');
+  conf.nginx.http.server._add('listen', '80');
+
+  //that'll create something like this:
+  /*
+    server {
+      listen 80;
+    }
+  */
+
+  //multiple blocks
+  conf.nginx.http._add('server');
+  conf.nginx.http.server[1]._add('listen', '443');
+
+  /*
+    server {
+      listen 80;
+    }
+    server {
+      listen 443;
+    }
+  */
 });
 ```
 
