@@ -196,6 +196,20 @@ describe('configuration editing', function() {
 			}(name));
 		}
 
+		it('should add new block', function(done) {
+			NginxConfFile.createFromSource('', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx._add('server');
+
+				file.nginx.should.have.property('server');
+				file.nginx.server._add('foo', 'bar');
+				file.nginx.server.should.have.property('foo');
+				file.nginx.server.foo.should.have.property('_value', 'bar');
+				done();
+			});
+		});
+
 		it('should create an array for multiple items', function(done) {
 			NginxConfFile.createFromSource('foo bar;', function(err, file) {
 				should.not.exist(err);
