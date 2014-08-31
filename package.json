@@ -1,6 +1,6 @@
 {
 	"name": "nginx-conf",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "Dynamically update nginx configuration files via programmatic API",
 	"keywords": [ "nginx", "configuration", "parser" ],
 	"directories": {
