@@ -244,6 +244,18 @@ describe('configuration editing', function() {
 			});
 		});
 
+		it('should create property with value and children', function(done) {
+			NginxConfFile.createFromSource('location /foo { hello world; }', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx.should.have.property('location');
+				file.nginx.location.should.have.property('_value', '/foo');
+				file.nginx.location.should.have.property('hello');
+				file.nginx.location.hello.should.have.property('_value', 'world');
+				done();
+			});
+		});
+
 		it('should remove first item when index is not given', function(done) {
 			NginxConfFile.createFromSource('foo bar; foo baz; foo bat;', function(err, file) {
 				should.not.exist(err);

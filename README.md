@@ -94,6 +94,18 @@ NginxConfFile.create('/etc/nginx.conf', function(err, conf) {
       listen 443;
     }
   */
+
+  // blocks with values:
+  conf.nginx.http.server[1]._add('location', '/');
+  conf.nginx.http.server[1].location._add('root', '/var/www/example.com');
+
+  /*
+    server {
+      location / {
+        root /var/www/example.com;
+      }
+    }
+  */
 });
 ```
 
