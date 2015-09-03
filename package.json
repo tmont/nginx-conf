@@ -2,6 +2,7 @@
 	"name": "nginx-conf",
 	"version": "0.2.4",
 	"description": "Dynamically update nginx configuration files via programmatic API",
+	"license": "MIT",
 	"keywords": [ "nginx", "configuration", "parser" ],
 	"directories": {
 		"lib": "src"
