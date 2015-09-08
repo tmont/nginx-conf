@@ -161,6 +161,7 @@ function NginxConfFile(tree, options) {
 	this.files = [];
 	this.tab = options.tab || '    ';
 	this._name = 'NginxConfFile';
+	this._currently_writing = false;
 	this.liveListener = (function(file) {
 		return function() {
 			file.flush();
@@ -212,6 +213,12 @@ NginxConfFile.prototype.flush = function(callback) {
 		return;
 	}
 
+	// If a previous flush hasn't finished yet, wait and try again later.
+	var self = this;
+	if (this._currently_writing)
+		setTimeout(function(){ self.flush(callback); }, 10);
+	self._currently_writing = true;
+
 	var contents = this.toString(),
 		len = this.files.length,
 		confFile = this,
@@ -223,6 +230,7 @@ NginxConfFile.prototype.flush = function(callback) {
 			err && errors.push(err);
 			completed++;
 			if (completed === len) {
+				self._currently_writing = false;
 				confFile.emit('flushed');
 				callback && callback(errors.length ? errors : null);
 			}
