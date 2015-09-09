@@ -166,6 +166,7 @@ function NginxConfFile(tree, options) {
 			file.flush();
 		};
 	}(this));
+	this._pending_writer = null;
 
 	createConfItem(this, this, { name: 'nginx' });
 	Object.defineProperty(this.nginx, '_root', {
@@ -206,7 +207,8 @@ NginxConfFile.prototype.die = function(file) {
 	return this;
 };
 
-NginxConfFile.prototype.flush = function(callback) {
+//Writes change to files. Not safe to call while an existing write is outstanding.
+NginxConfFile.prototype.write = function(callback) {
 	if (!this.files.length) {
 		callback && callback();
 		return;
@@ -228,6 +230,14 @@ NginxConfFile.prototype.flush = function(callback) {
 			}
 		});
 	}
+};
+
+NginxConfFile.prototype.flush = function(callback) {
+	if (this._pending_writer) {
+		clearTimeout(this._pending_writer);
+	}
+	var conf = this;
+	this._pending_writer = setTimeout(function () { conf.write(callback); }, 100);
 };
 
 NginxConfFile.prototype.toString = function() {
