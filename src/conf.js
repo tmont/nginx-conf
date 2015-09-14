@@ -166,7 +166,7 @@ function NginxConfFile(tree, options) {
 			file.flush();
 		};
 	}(this));
-	this._pending_writer = null;
+	this.writeTimeout = null;
 
 	createConfItem(this, this, { name: 'nginx' });
 	Object.defineProperty(this.nginx, '_root', {
@@ -207,16 +207,17 @@ NginxConfFile.prototype.die = function(file) {
 	return this;
 };
 
-//Writes change to files. Not safe to call while an existing write is outstanding.
+/**
+ * To handle potentially concurrent writes, use flush() instead.
+ */
 NginxConfFile.prototype.write = function(callback) {
 	if (!this.files.length) {
-		callback && callback();
+		callback && callback(null, false);
 		return;
 	}
 
 	var contents = this.toString(),
 		len = this.files.length,
-		confFile = this,
 		errors = [],
 		completed = 0;
 
@@ -225,19 +226,33 @@ NginxConfFile.prototype.write = function(callback) {
 			err && errors.push(err);
 			completed++;
 			if (completed === len) {
-				confFile.emit('flushed');
-				callback && callback(errors.length ? errors : null);
+				callback && callback(errors.length ? errors : null, true);
 			}
 		});
 	}
 };
 
 NginxConfFile.prototype.flush = function(callback) {
-	if (this._pending_writer) {
-		clearTimeout(this._pending_writer);
+	if (this.writeTimeout) {
+		clearTimeout(this.writeTimeout);
 	}
-	var conf = this;
-	this._pending_writer = setTimeout(function () { conf.write(callback); }, 100);
+
+	//the call to write() gets shoved into the event loop so that
+	//you can modify the tree more than once without hoping that
+	//no race conditions occur
+
+	//e.g. conf._remove('foo'); conf._remove('bar'); will only issue
+	//one call to write(), eliminating any possible race conditions
+	var self = this;
+	this.writeTimeout = setTimeout(function() {
+		self.write(function(err, wrote) {
+			if (!err && wrote) {
+				self.emit('flushed');
+			}
+
+			callback && callback(err);
+		});
+	}, 1);
 };
 
 NginxConfFile.prototype.toString = function() {

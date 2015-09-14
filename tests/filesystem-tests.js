@@ -15,7 +15,6 @@ function copyFile(callback) {
 	readStream.pipe(writeStream);
 }
 
-
 describe('flushing to disk', function() {
 	var tempFile, backupFile;
 	beforeEach(function(done) {
@@ -25,15 +24,13 @@ describe('flushing to disk', function() {
 		});
 	});
 
-	afterEach(function(done) {
+	afterEach(function() {
 		if (tempFile) {
 			fs.unlinkSync(tempFile);
 		}
 		if (backupFile) {
 			fs.unlinkSync(backupFile);
 		}
-
-		done();
 	});
 
 	it('when node value changes', function(done) {
@@ -79,6 +76,29 @@ describe('flushing to disk', function() {
 			});
 
 			file.nginx._remove('user');
+		});
+	});
+
+	it('only once for consecutive changes', function(done) {
+		NginxConfFile.create(tempFile, function(err, file) {
+			should.not.exist(err);
+			var flushed = false;
+			file.on('flushed', function() {
+				NginxConfFile.create(tempFile, function(err, file) {
+					if (flushed) {
+						done('Should not have flushed more than once!');
+						return;
+					}
+					flushed = true;
+					should.not.exist(err);
+					file.nginx.should.have.property('lolz');
+					file.nginx.should.have.property('foobie');
+					done();
+				});
+			});
+
+			file.nginx._add('lolz');
+			file.nginx._add('foobie');
 		});
 	});
 
