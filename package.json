@@ -15,8 +15,8 @@
 	},
 
 	"devDependencies": {
-		"mocha": "2.3.0",
-		"should": "7.0.1"
+		"mocha": "2.3.2",
+		"should": "7.1.0"
 	},
 
 	"scripts": {
