@@ -64,8 +64,8 @@ NginxConfFile.create('/etc/nginx.conf', function(err, conf) {
   console.log(conf.nginx.http.add_header[1]._value); //X-Load-Balancer lb-01
   console.log(conf.nginx.http.add_header[2]._value); //X-Secure true
 
-  conf.nginx.http.remove('add_header'); //removes add_header[0]
-  conf.nginx.http.remove('add_header', 1); //removes add_header[1]
+  conf.nginx.http._remove('add_header'); //removes add_header[0]
+  conf.nginx.http._remove('add_header', 1); //removes add_header[1]
 
   //if there's only one directive with a name, it is always flattened into a property
   console.log(conf.nginx.http.add_header._value); //X-Load-Balancer lb-01
