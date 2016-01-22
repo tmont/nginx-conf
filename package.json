@@ -7,6 +7,10 @@
 	"directories": {
 		"lib": "src"
 	},
+	"files": [
+		"src",
+		"index.js"
+	],
 
 	"author": "Tommy Montgomery <tmont@tmont.com> (http://tmont.com/)",
 	"repository": {
