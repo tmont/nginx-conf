@@ -29,6 +29,29 @@ describe('configuration editing', function() {
 			});
 		});
 
+		it('map block with quoted directive names', function(done) {
+			NginxConfFile.createFromSource('map $http_user_agent $mobile { default 0; "~Opera Mini" 1; \'\' meh; }', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx.should.have.property('map');
+				file.nginx.map.should.have.property('_name', 'map');
+				file.nginx.map.should.have.property('_value', '$http_user_agent $mobile');
+
+				file.nginx.map.should.have.property('default');
+				file.nginx.map.default.should.have.property('_name', 'default');
+				file.nginx.map.default.should.have.property('_value', '0');
+
+				file.nginx.map.should.have.property('"~Opera Mini"');
+				file.nginx.map['"~Opera Mini"'].should.have.property('_name', '"~Opera Mini"');
+				file.nginx.map['"~Opera Mini"'].should.have.property('_value', '1');
+
+				file.nginx.map.should.have.property('\'\'');
+				file.nginx.map['\'\''].should.have.property('_name', '\'\'');
+				file.nginx.map['\'\''].should.have.property('_value', 'meh');
+				done();
+			});
+		});
+
 		it('nodes with same name', function(done) {
 			NginxConfFile.createFromSource('location /foo { bar baz; } location /bar { bat qux; }', function(err, file) {
 				should.not.exist(err);
@@ -379,6 +402,24 @@ foo bar;\n';
 				should.exist(file);
 				var actual = file.toString();
 				actual.should.equal(source + '\n');
+				done();
+			});
+		});
+
+		it('should handle blocks with quoted strings', function(done) {
+			var source = 'map $http_user_agent $mobile { default 0; "~Opera Mini" 1; *.foo 2; }';
+			NginxConfFile.createFromSource(source, { tab: '  ' }, function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				var actual = file.toString();
+				var expected =
+'map $http_user_agent $mobile {\n\
+  default 0;\n\
+  "~Opera Mini" 1;\n\
+  *.foo 2;\n\
+}\n';
+
+				actual.should.equal(expected);
 				done();
 			});
 		});

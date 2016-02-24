@@ -67,11 +67,10 @@ NginxParser.prototype.parseNext = function() {
 		case '\'':
 		case '"':
 			if (!this.context.name) {
-				this.setError('Found a string but expected a directive');
-				return;
+				this.context.name = this.readString();
+			} else {
+				this.context.value += this.readString();
 			}
-
-			this.context.value += this.readString();
 			break;
 		case '#':
 			this.context.comments.push(this.readComment());

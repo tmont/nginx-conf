@@ -13,6 +13,17 @@ describe('parser', function() {
 			});
 		});
 
+		it('should parse directive with quoted name', function(done) {
+			parser.parse('"foo" bar;', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', '"foo"');
+				tree.children[0].should.have.property('value', 'bar');
+				done();
+			});
+		});
+
 		it('should parse directive with value', function(done) {
 			parser.parse('foo bar;', function(err, tree) {
 				should.not.exist(err);
@@ -124,16 +135,6 @@ describe('parser', function() {
 				err.should.have.property('line', 1);
 				err.should.have.property('index', 4);
 				err.should.have.property('message', 'Unable to parse quote-delimited value (probably an unclosed string)');
-				done();
-			});
-		});
-
-		it('should err if directive starts with quote', function(done) {
-			parser.parse('"foo";', function(err, tree) {
-				should.exist(err);
-				err.should.have.property('line', 1);
-				err.should.have.property('index', 0);
-				err.should.have.property('message', 'Found a string but expected a directive');
 				done();
 			});
 		});
