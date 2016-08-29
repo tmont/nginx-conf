@@ -194,10 +194,21 @@ describe('configuration editing', function() {
 	});
 
 	describe('adding and removing nodes', function() {
-		var blacklist = { _name: 1, _value: 1, _remove: 1, _add: 1, _getString: 1, _root: 1, toString: 1, _comments: 1 };
+		var blacklist = {
+			_name: 1,
+			_value: 1,
+			_remove: 1,
+			_add: 1,
+			_getString: 1,
+			_root: 1,
+			toString: 1,
+			_comments: 1,
+			_isVerbatim: 1,
+			_addVerbatimBlock: 1
+		};
 		for (var name in blacklist) {
 			(function(name) {
-				it('should not allow adding a node name "' + name + '"', function(done) {
+				it('should not allow adding a node named "' + name + '"', function(done) {
 					NginxConfFile.createFromSource('foo bar;', function(err, file) {
 						should.not.exist(err);
 						should.exist(file);
@@ -245,6 +256,22 @@ describe('configuration editing', function() {
 				file.nginx.server[0].should.not.have.property('foo');
 				file.nginx.server[1].should.have.property('foo');
 				file.nginx.server[1].foo.should.have.property('_value', 'bar');
+				done();
+			});
+		});
+
+		it('should add new verbatim block', function(done) {
+			NginxConfFile.createFromSource('', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx._addVerbatimBlock('content_by_lua_block', 'echo "hello"');
+
+				file.nginx.should.have.property('content_by_lua_block');
+				file.nginx.content_by_lua_block.should.have.property('_name', 'content_by_lua_block');
+				file.nginx.content_by_lua_block.should.have.property('_value', 'echo "hello"');
+				file.nginx.content_by_lua_block.should.have.property('_isVerbatim', true);
+
+				file.toString().should.equal('content_by_lua_block {echo "hello"}\n');
 				done();
 			});
 		});
@@ -420,6 +447,23 @@ foo bar;\n';
 }\n';
 
 				actual.should.equal(expected);
+				done();
+			});
+		});
+
+		it('should handle verbatim lua blocks', function(done) {
+			var source = 'something_by_lua_block { \n\
+if file then\n\
+  ngx.say("body is in file ", file)\n\
+else\n\
+  ngx.say("no body found")\n\
+end\n\
+}\n';
+			NginxConfFile.createFromSource(source, { tab: '  ' }, function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				var actual = file.toString();
+				actual.should.equal(source);
 				done();
 			});
 		});

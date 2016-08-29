@@ -2,7 +2,8 @@ var parser = require('./parser'),
 	fs = require('fs'),
 	blacklistedNames = {
 		_name: 1, _value: 1, _remove: 1, _add: 1,
-		_getString: 1, _root: 1, toString: 1, _comments: 1
+		_getString: 1, _root: 1, toString: 1, _comments: 1,
+		_isVerbatim: 1, _addVerbatimBlock: 1
 	};
 
 function createConfItem(file, context, node) {
@@ -37,19 +38,28 @@ function createConfItem(file, context, node) {
 			return this;
 		},
 
-		_add: function(name, value, children, comments) {
+		_add: function(name, value, children, comments, options) {
 			if (blacklistedNames[name]) {
 				throw new Error('The name "' + name + '" is reserved');
 			}
+
+			options = options || {};
 
 			var node = createConfItem(file, newContext, {
 				name: name,
 				value: value,
 				children: children,
-				comments: comments
+				comments: comments,
+				isVerbatim: !!options.isVerbatim
 			});
 			file.emit('added', node);
 			return this;
+		},
+
+		_addVerbatimBlock: function(name, value, comments) {
+			return this._add(name, value, null, comments, {
+				isVerbatim: true
+			});
 		},
 
 		_getString: function(depth) {
@@ -66,7 +76,9 @@ function createConfItem(file, context, node) {
 
 			buffer += prefix + (!this._root ? this._name : '');
 
-			if (this._value) {
+			if (this._isVerbatim) {
+				buffer += ' {' + (this._value || '') + '}';
+			} else if (this._value) {
 				buffer += ' ' + this._value;
 			}
 
@@ -96,7 +108,10 @@ function createConfItem(file, context, node) {
 					buffer += prefix + '}\n';
 				}
 			} else if (!this._root) {
-				buffer += ';\n';
+				if (!this._isVerbatim) {
+					buffer += ';';
+				}
+				buffer += '\n';
 			}
 
 			return buffer;
@@ -122,6 +137,12 @@ function createConfItem(file, context, node) {
 			value = newValue;
 			file.emit('changed', newContext, oldValue);
 		}
+	});
+
+	Object.defineProperty(newContext, '_isVerbatim', {
+		enumerable: false,
+		value: node.isVerbatim,
+		writable: false
 	});
 
 	Object.defineProperty(newContext, '_name', {

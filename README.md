@@ -15,6 +15,8 @@ Pretend you have an nginx config file like
 Note that all public methods are prefixed with `_` so that they (hopefully) don't clash with
 nginx's directives.
 
+Note: `*_content_by_lua_block` directives are supported in `>=v1.3.0`.
+
 ```javascript
 var NginxConfFile = require('nginx-conf').NginxConfFile;
 
@@ -106,6 +108,14 @@ NginxConfFile.create('/etc/nginx.conf', function(err, conf) {
       }
     }
   */
+
+  // lua blocks also work, but you can't put a mismatched "{" or "}" in a comment!
+  conf.nginx.http.location._addVerbatimBlock('rewrite_by_lua_block', '{\n\
+  ngx.say("this is a lua block!")\n\
+  res = ngx.location.capture("/memc",\n\
+    { args = { cmd = "incr", key = ngx.var.uri } }\n\
+  )\n\
+}');
 });
 ```
 

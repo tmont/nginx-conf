@@ -6,6 +6,7 @@ function NginxParseTreeNode(name, value, parent, children) {
 	this.parent = parent || null;
 	this.children = children || [];
 	this.comments = [];
+	this.isVerbatim = false;
 }
 
 function NginxParser() {
@@ -48,8 +49,26 @@ NginxParser.prototype.parseNext = function() {
 			this.context.value = this.context.value.trim();
 			this.context.parent.children.push(this.context);
 
-			//new context is child of current context, or a sibling to the parent
-			this.context = new NginxParseTreeNode(null, null, c === '{' ? this.context : this.context.parent);
+			if (c === '{' && this.context.name && /_by_lua_block$/.test(this.context.name)) {
+				//special handling of lua blocks: they are not treated as a regular "block", which would
+				//have child directives and stuff. lua "blocks" are just lua code surrounded by "{ }".
+				if (this.context.value) {
+					//there's already a value set, that means something is weird (pretty sure this is invalid...)
+					//basically the "lol" in something like this: content_by_lua_block lol { echo 'hello' }
+					this.setError(
+						'Already a value set for Lua block (alert nginx-conf developers if your syntax is valid)'
+					);
+					break;
+				}
+
+				this.context.value = this.readVerbatimBlock();
+				this.context.isVerbatim = true;
+				this.context = new NginxParseTreeNode(null, null, this.context.parent);
+			} else {
+				//new context is child of current context, or a sibling to the parent
+				this.context = new NginxParseTreeNode(null, null, c === '{' ? this.context : this.context.parent);
+			}
+
 			this.index++;
 			break;
 		case '}':
@@ -140,6 +159,40 @@ NginxParser.prototype.readComment = function() {
 	var result = /(.*?)(?:\r\n|\n|$)/.exec(this.source.substring(this.index));
 	this.index += result ? result[0].length : 0;
 	return result[1].substring(1); //ignore # character
+};
+
+NginxParser.prototype.readVerbatimBlock = function() {
+	//can't just use regex because it has to count the number of matching {}
+	//NOTE: this will break for lua comments that contain "{" or "}"
+	var openingBrackets = 0,
+		closingBrackets = 0,
+		current,
+		result = '';
+
+	while (current = this.source.charAt(this.index)) {
+		switch (current) {
+			case '}':
+				closingBrackets++;
+				break;
+			case '{':
+				openingBrackets++;
+				break;
+		}
+
+		result += current;
+		this.index++;
+
+		if (openingBrackets === closingBrackets) {
+			break;
+		}
+	}
+
+	if (openingBrackets !== closingBrackets) {
+		this.setError('Verbatim bock not terminated. Are you missing a closing curly bracket?');
+		return '';
+	}
+
+	return result.replace(/^{/, '').replace(/}$/, '');
 };
 
 NginxParser.prototype.parseFile = function(file, encoding, callback) {

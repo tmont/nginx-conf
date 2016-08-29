@@ -228,6 +228,60 @@ describe('parser', function() {
 				done();
 			});
 		});
+
+		it('should parse lua block', function(done) {
+			parser.parse('content_by_lua_block { ngx.say(ngx.var.arg_a) }', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+
+				tree.children[0].should.have.property('name', 'content_by_lua_block');
+				tree.children[0].should.have.property('value', ' ngx.say(ngx.var.arg_a) ');
+				tree.children[0].should.have.property('isVerbatim', true);
+				done();
+			});
+		});
+
+		it('should parse lua block with nested curly brackets', function(done) {
+			parser.parse('content_by_lua_block { lol { foo {} } }', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+
+				tree.children[0].should.have.property('name', 'content_by_lua_block');
+				tree.children[0].should.have.property('value', ' lol { foo {} } ');
+				tree.children[0].should.have.property('isVerbatim', true);
+				done();
+			});
+		});
+
+		it('should parse lua block with newlines', function(done) {
+			parser.parse('content_by_lua_block { ngx.say(ngx.var.arg_a)\nend }', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+
+				tree.children[0].should.have.property('name', 'content_by_lua_block');
+				tree.children[0].should.have.property('value', ' ngx.say(ngx.var.arg_a)\nend ');
+				tree.children[0].should.have.property('isVerbatim', true);
+				done();
+			});
+		});
+
+		it('should parse directive following a lua block', function(done) {
+			parser.parse('content_by_lua_block { echo \'foo\' } foo bar;', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(2);
+
+				tree.children[0].should.have.property('name', 'content_by_lua_block');
+				tree.children[0].should.have.property('value', ' echo \'foo\' ');
+				tree.children[0].should.have.property('isVerbatim', true);
+				tree.children[1].should.have.property('name', 'foo');
+				tree.children[1].should.have.property('value', 'bar');
+				done();
+			});
+		});
 	});
 
 	describe('invalid and weird syntax', function() {
@@ -241,6 +295,30 @@ describe('parser', function() {
 
 		it('directive value not terminated with ";"', function(done) {
 			parser.parse('foo bar', function(err) {
+				should.exist(err);
+				err.should.have.property('message', 'Word not terminated. Are you missing a semicolon?');
+				done();
+			});
+		});
+
+		it('*_by_lua_block directive not terminated with "}"', function(done) {
+			parser.parse('foo_by_lua_block { ngx.say(\'Hello,world!\')', function(err) {
+				should.exist(err);
+				err.should.have.property('message', 'Verbatim bock not terminated. Are you missing a closing curly bracket?');
+				done();
+			});
+		});
+
+		it('*_by_lua_block directive with mismatched curly brackets', function(done) {
+			parser.parse('foo_by_lua_block { foo {} ', function(err) {
+				should.exist(err);
+				err.should.have.property('message', 'Verbatim bock not terminated. Are you missing a closing curly bracket?');
+				done();
+			});
+		});
+
+		it('*_by_lua_block should blow up if mismatched curly bracket is in a comment', function(done) {
+			parser.parse('foo_by_lua_block {\n-- this is a comment }\n } ', function(err) {
 				should.exist(err);
 				err.should.have.property('message', 'Word not terminated. Are you missing a semicolon?');
 				done();
