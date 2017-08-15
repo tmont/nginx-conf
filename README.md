@@ -1,4 +1,5 @@
-#nginx-conf
+# nginx-conf
+
 [![Build Status](https://travis-ci.org/tmont/nginx-conf.png)](https://travis-ci.org/tmont/nginx-conf)
 [![NPM version](https://badge.fury.io/js/nginx-conf.png)](http://badge.fury.io/js/nginx-conf)
 
