@@ -9,6 +9,8 @@ file programmatically.
 ## Installation
 `npm install nginx-conf`
 
+There are no dependencies and this library is tested on node v0.8 - v8.
+
 ## Usage
 Pretend you have an nginx config file like
 [this one](https://github.com/tmont/nginx-conf/blob/master/tests/files/nginx-home.conf).
