@@ -220,7 +220,7 @@ NginxConfFile.prototype.die = function(file) {
 	var index = this.files.indexOf(file);
 	if (index !== -1) {
 		this.files.splice(index, 1);
-		if (this.files.length == 0) {
+		if (!this.files.length) {
 			this.removeListener('added removed changed', this.liveListener);
 		}
 	}
