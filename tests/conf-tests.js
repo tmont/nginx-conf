@@ -480,5 +480,18 @@ end\n\
 				done();
 			});
 		});
+		
+		it('should handle nested if statements with rewrite', function(done) {
+            		var source = 'if ($http_cookie ~* "id=([^;]+)(?:;|$)") {\n\
+  rewrite ^/(.*)$ https://$http_host/#/login?$args?;\n\
+}\n';
+			NginxConfFile.createFromSource(source, {tab: '  '}, function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				var actual = file.toString();
+				actual.should.equal(source);
+				done();
+			});
+		});
 	});
 });
