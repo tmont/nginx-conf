@@ -282,6 +282,36 @@ describe('parser', function() {
 				done();
 			});
 		});
+
+		it('should parse if statement', function(done) {
+			parser.parse('if ($bad) { return 403; }', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+
+				tree.children[0].should.have.property('name', 'if');
+				tree.children[0].should.have.property('value', '($bad)');
+				tree.children[0].children.should.have.length(1);
+				tree.children[0].children[0].should.have.property('name', 'return');
+				tree.children[0].children[0].should.have.property('value', '403');
+				done();
+			});
+		});
+
+		it('should parse if statement with regex and newlines', function(done) {
+			parser.parse('if ($http_cookie ~* "id=([^;]+)(?:;|$)") \n{\n set $id $1;\n }', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+
+				tree.children[0].should.have.property('name', 'if');
+				tree.children[0].should.have.property('value', '($http_cookie ~* "id=([^;]+)(?:;|$)")');
+				tree.children[0].children.should.have.length(1);
+				tree.children[0].children[0].should.have.property('name', 'set');
+				tree.children[0].children[0].should.have.property('value', '$id $1');
+				done();
+			});
+		});
 	});
 
 	describe('invalid and weird syntax', function() {

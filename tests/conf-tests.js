@@ -467,5 +467,18 @@ end\n\
 				done();
 			});
 		});
+
+		it('should handle if statements', function(done) {
+			var source = 'if ($http_cookie ~* "id=([^;]+)(?:;|$)") {\n\
+  set $id $1;\n\
+}\n';
+			NginxConfFile.createFromSource(source, {tab: '  '}, function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				var actual = file.toString();
+				actual.should.equal(source);
+				done();
+			});
+		});
 	});
 });

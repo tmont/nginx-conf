@@ -33,6 +33,21 @@ describe('flushing to disk', function() {
 		}
 	});
 
+	it('should return expected value', function(done) {
+		NginxConfFile.create(tempFile, function(err, file) {
+			should.not.exist(err);
+
+			file.on('flushed', function() {
+				var flushed = fs.readFileSync(tempFile, { encoding: 'utf8' });
+				var expected = fs.readFileSync(__dirname + '/files/expected.conf', { encoding: 'utf8' });
+				flushed.should.equal(expected);
+				done();
+			});
+
+			file.flush();
+		});
+	});
+
 	it('when node value changes', function(done) {
 		NginxConfFile.create(tempFile, function(err, file) {
 			should.not.exist(err);
