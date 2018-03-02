@@ -312,6 +312,23 @@ describe('parser', function() {
 				done();
 			});
 		});
+
+		it('should handle if statement with fragment', function(done) {
+			var source = 'if ($http_cookie ~* "id=([^;]+)(?:;|$)") {\n\
+  rewrite ^/(.*)$ https://$http_host/#/login?$args?;\n\
+}\n';
+			parser.parse(source, function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'if');
+				tree.children[0].should.have.property('value', '($http_cookie ~* "id=([^;]+)(?:;|$)")');
+				tree.children[0].children.should.have.length(1);
+				tree.children[0].children[0].should.have.property('name', 'rewrite');
+				tree.children[0].children[0].should.have.property('value', '^/(.*)$ https://$http_host/#/login?$args?');
+				done();
+			});
+		});
 	});
 
 	describe('invalid and weird syntax', function() {

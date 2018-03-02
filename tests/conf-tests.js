@@ -480,9 +480,9 @@ end\n\
 				done();
 			});
 		});
-		
-		it('should handle nested if statements with rewrite', function(done) {
-            		var source = 'if ($http_cookie ~* "id=([^;]+)(?:;|$)") {\n\
+
+		it('should handle if statements with fragment', function(done) {
+			var source = 'if ($http_cookie ~* "id=([^;]+)(?:;|$)") {\n\
   rewrite ^/(.*)$ https://$http_host/#/login?$args?;\n\
 }\n';
 			NginxConfFile.createFromSource(source, {tab: '  '}, function(err, file) {

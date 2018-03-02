@@ -96,6 +96,14 @@ NginxParser.prototype.parseNext = function() {
 			break;
 		default:
 			value = this.readWord();
+			var trimmedValue = value.trim();
+			if (trimmedValue === '#') {
+				// if value starts with whitespace and encounters a "#", we're at a comment.
+				// we can't delimit words by "#" because comments can only appear outside of directives.
+				// http://nginx.org/en/docs/beginners_guide.html#conf_structure
+				this.index--;
+				break;
+			}
 			if (!this.context.name) {
 				this.context.name = value.trim();
 				//read trailing whitespace
@@ -146,7 +154,7 @@ NginxParser.prototype.setError = function(message) {
 };
 
 NginxParser.prototype.readWord = function() {
-	var result = /^(.+?)[\s#;{}'"]/.exec(this.source.substring(this.index));
+	var result = /^(.+?)[\s;{}'"]/.exec(this.source.substring(this.index));
 	if (!result) {
 		this.setError('Word not terminated. Are you missing a semicolon?');
 		return '';
