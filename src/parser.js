@@ -160,7 +160,25 @@ NginxParser.prototype.readWord = function() {
 		return '';
 	}
 	this.index += result[1].length;
-	return result[1];
+
+	var word = result[1];
+	if (word[word.length - 1] === '$' && this.source[this.index] === '{') {
+		// interpolated variable, e.g. ${foo}, read until "}"
+		result = /^(.+?})/.exec(this.source.substring(this.index));
+		if (!result) {
+			this.setError('Expected closing bracket "}" for interpolated variable');
+			return word;
+		}
+
+		word += result[1];
+		this.index += result[1].length;
+		// if the current char is not whitespace, ";" or "{", there is more to the word
+		if (!/[\s{;]/.test(this.source[this.index])) {
+			word += this.readWord();
+		}
+	}
+
+	return word;
 };
 
 NginxParser.prototype.readComment = function() {

@@ -82,6 +82,42 @@ describe('parser', function() {
 				done();
 			});
 		});
+
+		it('should parse directive with interpolated variable', function(done) {
+			parser.parse('foo bar${baz}bat;', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', 'bar${baz}bat');
+				done();
+			});
+		});
+
+		it('should parse directive that ends with interpolated variable', function(done) {
+			parser.parse('foo bar${baz};', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', 'bar${baz}');
+				done();
+			});
+		});
+
+		it('should parse directive with interpolated variable and whitespace', function(done) {
+			parser.parse('foo bar${baz} bat;', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', 'bar${baz} bat');
+				done();
+			});
+		});
 	});
 
 	describe('strings', function() {
@@ -158,6 +194,28 @@ describe('parser', function() {
 				tree.children.should.have.length(1);
 				tree.children[0].should.have.property('name', 'foo');
 				tree.children[0].should.have.property('value', 'bar \'{\'');
+				done();
+			});
+		});
+
+		it('should parse value with interpolated variable', function(done) {
+			parser.parse('foo "bar${var}";', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', '"bar${var}"');
+				done();
+			});
+		});
+
+		it('should parse value with interpolated variable and whitespace', function(done) {
+			parser.parse('foo "bar${var}  ";', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', '"bar${var}  "');
 				done();
 			});
 		});
@@ -326,6 +384,19 @@ describe('parser', function() {
 				tree.children[0].children.should.have.length(1);
 				tree.children[0].children[0].should.have.property('name', 'rewrite');
 				tree.children[0].children[0].should.have.property('value', '^/(.*)$ https://$http_host/#/login?$args?');
+				done();
+			});
+		});
+
+		it('should parse value with interpolated variable that opens scope immediately afterward', function(done) {
+			parser.parse('foo bar${var}{ hi; }', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].should.have.property('value', 'bar${var}');
+				tree.children[0].children.should.have.length(1);
+				tree.children[0].children[0].should.have.property('name', 'hi');
 				done();
 			});
 		});
