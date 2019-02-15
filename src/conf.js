@@ -178,13 +178,15 @@ function createConfItem(file, context, node) {
 }
 
 function NginxConfFile(tree, options) {
-	options = options || {};
+	options = options || { implicitFlush: true };
 	this.files = [];
 	this.tab = options.tab || '    ';
 	this._name = 'NginxConfFile';
 	this.liveListener = (function(file) {
 		return function() {
-			file.flush();
+			if (options.implicitFlush) {
+				file.flush();
+			}
 		};
 	}(this));
 	this.writeTimeout = null;
