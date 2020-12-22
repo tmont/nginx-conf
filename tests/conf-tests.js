@@ -104,6 +104,32 @@ describe('configuration editing', function() {
 				done();
 			});
 		});
+
+		it('uniform access to single-value and multi-value directives', function(done) {
+			NginxConfFile.createFromSource('foo a;', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+
+				file.nginx.should.have.property('foo');
+				file.nginx.foo.should.have.property('_value', 'a');
+				file.nginx.foo.should.have.property('0');
+				file.nginx.foo[0].should.have.property('_value', 'a');
+
+				file.nginx.foo[0]._value = 'ax';
+				file.nginx.foo.should.have.property('_value', 'ax');
+
+				file.nginx._add('foo', 'b');
+				file.nginx.foo[0].should.have.property('_value', 'ax');
+				file.nginx.foo[1].should.have.property('_value', 'b');
+				file.nginx.foo.should.not.have.property('_value');
+
+				file.nginx._remove('foo');
+				file.nginx.foo.should.have.property('_value', 'b');
+				file.nginx.foo[0].should.have.property('_value', 'b');
+
+				done();
+			});
+		});
 	});
 
 	describe('events', function() {

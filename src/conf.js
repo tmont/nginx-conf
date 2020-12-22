@@ -26,6 +26,12 @@ function createConfItem(file, context, node) {
 					this[name].splice(index, 1);
 					if (this[name].length === 1) {
 						this[name] = this[name][0];
+						//allow uniform access to single-value and multi-value directives.
+						Object.defineProperty(this[name], '0', {
+							configurable: true,
+							enumerable: false,
+							get: function() { return this; }
+						});
 					}
 					file.emit('removed', node);
 				}
@@ -166,6 +172,12 @@ function createConfItem(file, context, node) {
 		context[name].push(newContext);
 	} else {
 		context[name] = newContext;
+		//allow uniform access to single-value and multi-value directives.
+		Object.defineProperty(context[name], '0', {
+			configurable: true,
+			enumerable: false,
+			get: function() { return this; }
+		});
 	}
 
 	if (children) {
