@@ -276,6 +276,21 @@ describe('configuration editing', function() {
 			});
 		});
 
+		it('should add new empty block', function(done) {
+			NginxConfFile.createFromSource('', function(err, file) {
+				should.not.exist(err);
+				should.exist(file);
+				file.nginx._add('events', '', []);
+
+				file.nginx.should.have.property('events');
+				file.nginx.events.should.have.property('_name', 'events');
+				file.nginx.events.should.have.property('__isBlock', true);
+
+				file.toString().should.equal('events {\n}\n');
+				done();
+			});
+		});
+
 		it('should create an array for multiple items', function(done) {
 			NginxConfFile.createFromSource('foo bar;', function(err, file) {
 				should.not.exist(err);

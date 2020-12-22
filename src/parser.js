@@ -7,6 +7,7 @@ function NginxParseTreeNode(name, value, parent, children) {
 	this.children = children || [];
 	this.comments = [];
 	this.isVerbatim = false;
+	this.isBlock = !!children;
 }
 
 function NginxParser() {
@@ -20,7 +21,7 @@ function NginxParser() {
 NginxParser.prototype.parse = function(source, callback) {
 	this.source = source;
 	this.index = 0;
-	this.tree = new NginxParseTreeNode('[root]');
+	this.tree = new NginxParseTreeNode('[root]', '', null, []);
 	this.context = new NginxParseTreeNode(null, null, this.tree);
 	this.error = null;
 
@@ -65,6 +66,9 @@ NginxParser.prototype.parseNext = function() {
 				this.context.isVerbatim = true;
 				this.context = new NginxParseTreeNode(null, null, this.context.parent);
 			} else {
+				if (c === '{') {
+					this.context.isBlock = true;
+				}
 				//new context is child of current context, or a sibling to the parent
 				this.context = new NginxParseTreeNode(null, null, c === '{' ? this.context : this.context.parent);
 			}

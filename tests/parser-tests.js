@@ -400,6 +400,17 @@ describe('parser', function() {
 				done();
 			});
 		});
+
+		it('should parse empty scope', function(done) {
+			parser.parse('foo {}', function(err, tree) {
+				should.not.exist(err);
+				should.exist(tree);
+				tree.children.should.have.length(1);
+				tree.children[0].should.have.property('name', 'foo');
+				tree.children[0].children.should.have.length(0);
+				done();
+			});
+		});
 	});
 
 	describe('invalid and weird syntax', function() {

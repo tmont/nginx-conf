@@ -3,7 +3,7 @@ var parser = require('./parser'),
 	blacklistedNames = {
 		_name: 1, _value: 1, _remove: 1, _add: 1,
 		_getString: 1, _root: 1, toString: 1, _comments: 1,
-		_isVerbatim: 1, _addVerbatimBlock: 1
+		_isVerbatim: 1, _addVerbatimBlock: 1, __isBlock: 1
 	};
 
 function createConfItem(file, context, node) {
@@ -50,7 +50,8 @@ function createConfItem(file, context, node) {
 				value: value,
 				children: children,
 				comments: comments,
-				isVerbatim: !!options.isVerbatim
+				isVerbatim: !!options.isVerbatim,
+				isBlock: !!children
 			});
 			file.emit('added', node);
 			return this;
@@ -90,7 +91,7 @@ function createConfItem(file, context, node) {
 					return newContext[key];
 				});
 
-			if (properties.length) {
+			if (this.__isBlock || properties.length) {
 				if (!this._root) {
 					buffer += ' {\n';
 				}
@@ -137,6 +138,16 @@ function createConfItem(file, context, node) {
 			value = newValue;
 			file.emit('changed', newContext, oldValue);
 		}
+	});
+
+	// This property is for *internal* use only!
+	// When this property is true, the item is definitely a block, but the
+	// reverse implication may not apply! It's just a hack to ensure that empty
+	// blocks are rendered as blocks.
+	Object.defineProperty(newContext, '__isBlock', {
+		enumerable: false,
+		value: node.isBlock,
+		writable: false
 	});
 
 	Object.defineProperty(newContext, '_isVerbatim', {
@@ -189,7 +200,7 @@ function NginxConfFile(tree, options) {
 	}(this));
 	this.writeTimeout = null;
 
-	createConfItem(this, this, { name: 'nginx' });
+	createConfItem(this, this, { name: 'nginx' }, []);
 	Object.defineProperty(this.nginx, '_root', {
 		writable: false,
 		value: true,
