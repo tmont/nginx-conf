@@ -11,6 +11,7 @@
 		"src",
 		"index.js"
 	],
+	"types": "index.d.ts",
 
 	"author": "Tommy Montgomery <tmont@tmont.com> (http://tmont.com/)",
 	"repository": {
@@ -19,8 +20,22 @@
 	},
 
 	"devDependencies": {
+		"@types/node": "8.10.66",
 		"mocha": "2.4.5",
-		"should": "8.2.2"
+		"should": "8.2.2",
+		"tiny-typed-emitter": "2.0.3"
+	},
+	"peerDependencies": {
+		"tiny-typed-emitter": "^2.0.3",
+		"@types/node": "*"
+	},
+	"peerDependenciesMeta": {
+		"tiny-typed-emitter": {
+			"optional": true
+		},
+		"@types/node": {
+			"optional": true
+		}
 	},
 
 	"scripts": {
