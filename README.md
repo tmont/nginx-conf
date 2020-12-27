@@ -9,7 +9,7 @@ file programmatically.
 ## Installation
 `npm install nginx-conf`
 
-There are no dependencies and this library is tested on node v0.8 - v8.
+This library has no dependencies.
 
 ## Usage
 Pretend you have an nginx config file like
