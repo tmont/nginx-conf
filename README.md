@@ -180,3 +180,10 @@ cd nginx-conf
 npm install
 npm test
 ```
+
+If you're making changes, you should run `npm run watch` in a separate
+terminal. `tsc` will output the JavaScript in the `dist/` directory.
+The tests reference the JavaScript files in `dist/`, not the TypeScript
+files elsewhere.
+
+Only the stuff in `dist/` is included in the NPM package.
