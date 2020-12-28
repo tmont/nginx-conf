@@ -22,6 +22,7 @@ Note: `*_content_by_lua_block` directives are supported in `>=v1.3.0`.
 
 ```javascript
 var NginxConfFile = require('nginx-conf').NginxConfFile;
+// TypeScript: import {NginxConfFile} from 'nginx-conf';
 
 NginxConfFile.create('/etc/nginx.conf', function(err, conf) {
   if (err) {
@@ -150,7 +151,7 @@ attached to the node. If it's *after* the directive (after the semicolon or clos
 it will be attached to the *next* node, or ignored if it's at the end of the file.
 
 Assuming this nginx configuration:
-```
+```nginx
 foo #comment
 bar;
 ```
@@ -162,7 +163,7 @@ console.log(conf.nginx.foo._comments[0]); //comment
 ```
 
 But if the comment comes *after*:
-```
+```nginx
 foo bar;
 #comment
 ```
@@ -173,7 +174,7 @@ console.log(conf.nginx.foo._comments.length); //0
 ```
 
 ## Development
-```
+```bash
 git clone git@github.com:tmont/nginx-conf.git
 cd nginx-conf
 npm install

@@ -3,26 +3,33 @@
 	"version": "1.7.0",
 	"description": "Dynamically update nginx configuration files via programmatic API",
 	"license": "MIT",
-	"keywords": [ "nginx", "configuration", "parser" ],
+	"keywords": [
+		"nginx",
+		"configuration",
+		"parser"
+	],
 	"directories": {
 		"lib": "src"
 	},
 	"files": [
-		"src",
-		"index.js"
+		"dist"
 	],
-
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"author": "Tommy Montgomery <tmont@tmont.com> (http://tmont.com/)",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/tmont/nginx-conf.git"
 	},
 	"devDependencies": {
+		"@types/node": "14.14.16",
 		"mocha": "8.2.1",
 		"should": "13.2.3",
 		"typescript": "4.1.3"
 	},
 	"scripts": {
+		"build": "node_modules/.bin/tsc",
+		"watch": "node_modules/.bin/tsc --watch --incremental --preserveWatchOutput",
 		"test": "node_modules/.bin/mocha -R spec ./tests"
 	}
 }

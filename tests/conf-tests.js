@@ -1,5 +1,5 @@
 var should = require('should'),
-	NginxConfFile = require('../').NginxConfFile;
+	NginxConfFile = require('../dist').NginxConfFile;
 
 describe('configuration editing', function() {
 	describe('access', function() {

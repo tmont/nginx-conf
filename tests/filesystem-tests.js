@@ -1,5 +1,5 @@
 var should = require('should'),
-	NginxConfFile = require('../').NginxConfFile,
+	NginxConfFile = require('../dist').NginxConfFile,
 	fs = require('fs'),
 	path = require('path');
 

@@ -1,21 +1,30 @@
 {
 	"compilerOptions": {
-		"target": "es6",
+		"target": "es2017",
 		"module": "commonjs",
-		"noEmit": true,
+		"moduleResolution": "Node",
+		"declaration": true,
 		"strict": true,
 		"noImplicitAny": true,
 		"strictNullChecks": true,
 		"strictFunctionTypes": true,
 		"strictBindCallApply": true,
-		"strictPropertyInitialization": true,
+		"strictPropertyInitialization": false,
 		"noImplicitThis": true,
 		"alwaysStrict": true,
 		"esModuleInterop": true,
 		"skipLibCheck": false,
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"outDir": "./dist",
+		"sourceMap": true,
+		"types": [
+			"node"
+		],
+		"tsBuildInfoFile": "tsconfig.tsbuildinfo"
 	},
-	"include": [
-		"**/*.d.ts"
+	"files": [
+		"index.ts",
+		"src/conf.ts",
+		"src/parser.ts"
 	]
 }
