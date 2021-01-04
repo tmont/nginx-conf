@@ -14,7 +14,7 @@ interface NginxConfItemApi {
 interface NginxConfItemProps {
     _name: string;
     _value: string | number;
-    _root: boolean;
+    _root?: boolean;
     _comments: string[];
     _isVerbatim: boolean;
     __isBlock: boolean;

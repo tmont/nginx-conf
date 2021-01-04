@@ -36,7 +36,7 @@ const blacklistedNames = {
     _addVerbatimBlock: 1,
     __isBlock: 1,
 };
-const createConfItem = (file, target, node) => {
+const createConfItem = (file, target, node, isRoot = false) => {
     const name = node.name;
     let value = node.value;
     const children = node.children;
@@ -160,20 +160,21 @@ const createConfItem = (file, target, node) => {
     defineProperty('_isVerbatim', node.isVerbatim);
     defineProperty('_name', name);
     defineProperty('_comments', comments);
+    if (isRoot) {
+        defineProperty('_root', true);
+    }
     const item = newContext;
     if (name) {
         const existing = target[name];
         if (existing) {
             existing.push(item);
         }
-        else {
-            if (name === 'nginx') {
-                // TODO: ugh
-                target[name] = item;
-            }
-            else {
-                target[name] = [item];
-            }
+        else if (!isRoot) {
+            // this whole interface is kinda weird, but basically the "root"
+            // is treated differently as it's just attached to the NginxConfFile
+            // instance on the "nginx" property, so we don't actually want to do
+            // anything if the we're operating on the "root" node
+            target[name] = [item];
         }
     }
     if (children) {
@@ -193,7 +194,7 @@ class NginxConfFile extends events.EventEmitter {
             this.flush();
         };
         this.writeTimeout = null;
-        createConfItem(this, this, {
+        this.nginx = createConfItem(this, this, {
             name: 'nginx',
             children: null,
             comments: [],
@@ -201,12 +202,7 @@ class NginxConfFile extends events.EventEmitter {
             isVerbatim: false,
             parent: null,
             value: '',
-        });
-        Object.defineProperty(this.nginx, '_root', {
-            writable: false,
-            value: true,
-            enumerable: false
-        });
+        }, true);
         const children = tree.children || [];
         for (let i = 0; i < children.length; i++) {
             const node = children[i];

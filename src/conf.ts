@@ -38,7 +38,7 @@ interface NginxConfItemApi {
 interface NginxConfItemProps {
 	_name: string;
 	_value: string | number;
-	_root: boolean;
+	_root?: boolean;
 	_comments: string[];
 	_isVerbatim: boolean;
 	__isBlock: boolean;
@@ -54,7 +54,12 @@ interface AddOptions {
 	isVerbatim?: boolean;
 }
 
-const createConfItem = (file: NginxConfFile, target: IndexableConfItem, node: NginxParseTreeNode): NginxConfItem => {
+const createConfItem = (
+	file: NginxConfFile,
+	target: IndexableConfItem,
+	node: NginxParseTreeNode,
+	isRoot = false,
+): NginxConfItem => {
 	const name = node.name;
 	let value = node.value;
 	const children = node.children;
@@ -198,6 +203,9 @@ const createConfItem = (file: NginxConfFile, target: IndexableConfItem, node: Ng
 	defineProperty('_isVerbatim', node.isVerbatim);
 	defineProperty('_name', name);
 	defineProperty('_comments', comments);
+	if (isRoot) {
+		defineProperty('_root', true);
+	}
 
 	const item = newContext as NginxConfItem;
 
@@ -205,13 +213,12 @@ const createConfItem = (file: NginxConfFile, target: IndexableConfItem, node: Ng
 		const existing = target[name];
 		if (existing) {
 			existing.push(item);
-		} else {
-			if (name === 'nginx') {
-				// TODO: ugh
-				(target as any)[name] = item;
-			} else {
-				target[name] = [item];
-			}
+		} else if (!isRoot) {
+			// this whole interface is kinda weird, but basically the "root"
+			// is treated differently as it's just attached to the NginxConfFile
+			// instance on the "nginx" property, so we don't actually want to do
+			// anything if the we're operating on the "root" node
+			target[name] = [ item ];
 		}
 	}
 
@@ -243,7 +250,7 @@ export class NginxConfFile extends events.EventEmitter {
 		};
 		this.writeTimeout = null;
 
-		createConfItem(this, this as any as IndexableConfItem, {
+		this.nginx = createConfItem(this, this as any as IndexableConfItem, {
 			name: 'nginx',
 			children: null,
 			comments: [],
@@ -251,12 +258,7 @@ export class NginxConfFile extends events.EventEmitter {
 			isVerbatim: false,
 			parent: null,
 			value: '',
-		});
-		Object.defineProperty(this.nginx, '_root', {
-			writable: false,
-			value: true,
-			enumerable: false
-		});
+		}, true);
 
 		const children = tree.children || [];
 		for (let i = 0; i < children.length; i++) {
