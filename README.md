@@ -11,6 +11,19 @@ file programmatically.
 
 This library has no dependencies.
 
+## Breaking Changes
+Version `2.0.0` changed the way that single directives are accessed. In short, everything
+is now array-indexed.
+
+
+```javascript
+// Pre 2.0.0:
+conf.nginx.foo.bar._value;
+
+// 2.0.0+
+conf.nginx.foo[0].bar[0]._value;
+```
+
 ## Usage
 Pretend you have an nginx config file like
 [this one](https://github.com/tmont/nginx-conf/blob/master/tests/files/nginx-home.conf).
