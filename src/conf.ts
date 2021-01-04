@@ -25,19 +25,19 @@ interface NginxConfItemApi {
 	_remove(name: string, index?: number): this;
 	_add(
 		name: string,
-		value: string,
-		children: NginxParseTreeNode[] | null,
-		comments: string[],
+		value?: string | number | null,
+		children?: NginxParseTreeNode[] | null,
+		comments?: string[],
 		options?: AddOptions,
 	): this;
-	_addVerbatimBlock(name: string, value: string, comments: string[]): this;
+	_addVerbatimBlock(name: string, value: string, comments?: string[]): this;
 	_getString(depth: number): string;
 	toString(): string;
 }
 
 interface NginxConfItemProps {
 	_name: string;
-	_value: string;
+	_value: string | number;
 	_root: boolean;
 	_comments: string[];
 	_isVerbatim: boolean;
@@ -90,9 +90,9 @@ const createConfItem = (file: NginxConfFile, target: IndexableConfItem, node: Ng
 
 			const node = createConfItem(file, item, {
 				name: name,
-				value: value,
-				children: children,
-				comments: comments,
+				value: (value || '').toString(),
+				children: children || null,
+				comments: comments || [],
 				isVerbatim: !!options.isVerbatim,
 				isBlock: !!children,
 				parent: null,

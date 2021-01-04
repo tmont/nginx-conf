@@ -6,14 +6,14 @@ export interface NginxConfOptions {
 }
 interface NginxConfItemApi {
     _remove(name: string, index?: number): this;
-    _add(name: string, value: string, children: NginxParseTreeNode[] | null, comments: string[], options?: AddOptions): this;
-    _addVerbatimBlock(name: string, value: string, comments: string[]): this;
+    _add(name: string, value?: string | number | null, children?: NginxParseTreeNode[] | null, comments?: string[], options?: AddOptions): this;
+    _addVerbatimBlock(name: string, value: string, comments?: string[]): this;
     _getString(depth: number): string;
     toString(): string;
 }
 interface NginxConfItemProps {
     _name: string;
-    _value: string;
+    _value: string | number;
     _root: boolean;
     _comments: string[];
     _isVerbatim: boolean;

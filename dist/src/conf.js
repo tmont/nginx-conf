@@ -64,9 +64,9 @@ const createConfItem = (file, target, node) => {
             const item = newContext;
             const node = createConfItem(file, item, {
                 name: name,
-                value: value,
-                children: children,
-                comments: comments,
+                value: (value || '').toString(),
+                children: children || null,
+                comments: comments || [],
                 isVerbatim: !!options.isVerbatim,
                 isBlock: !!children,
                 parent: null,

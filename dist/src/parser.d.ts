@@ -6,7 +6,7 @@ export declare class NginxParseTreeNode {
     readonly comments: string[];
     isVerbatim: boolean;
     isBlock: boolean;
-    constructor(name: string, value: string | null, parent: NginxParseTreeNode | null, children?: NginxParseTreeNode[] | null);
+    constructor(name: string, value: string | number | null, parent: NginxParseTreeNode | null, children?: NginxParseTreeNode[] | null);
 }
 export interface NginxParseError {
     message: string;

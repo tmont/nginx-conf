@@ -11,12 +11,12 @@ export class NginxParseTreeNode {
 
 	public constructor(
 		name: string,
-		value: string | null,
+		value: string | number | null,
 		parent: NginxParseTreeNode | null,
 		children?: NginxParseTreeNode[] | null,
 	) {
 		this.name = name;
-		this.value = value || '';
+		this.value = (value || '').toString();
 		this.parent = parent;
 		this.children = children || [];
 		this.isBlock = !!children;

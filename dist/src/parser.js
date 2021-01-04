@@ -27,7 +27,7 @@ class NginxParseTreeNode {
         this.isVerbatim = false;
         this.isBlock = false;
         this.name = name;
-        this.value = value || '';
+        this.value = (value || '').toString();
         this.parent = parent;
         this.children = children || [];
         this.isBlock = !!children;
