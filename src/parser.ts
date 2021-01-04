@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 export class NginxParseTreeNode {
-	public name: string | null;
+	public name: string;
 	public value: string;
 	public parent: NginxParseTreeNode | null;
 	public readonly children: NginxParseTreeNode[] | null;
@@ -10,7 +10,7 @@ export class NginxParseTreeNode {
 	public isBlock = false;
 
 	public constructor(
-		name: string | null,
+		name: string,
 		value: string | null,
 		parent: NginxParseTreeNode | null,
 		children?: NginxParseTreeNode[] | null,
@@ -48,7 +48,7 @@ export class NginxParser {
 		this.source = source;
 		this.index = 0;
 		this.tree = new NginxParseTreeNode('[root]', '', null, []);
-		this.context = new NginxParseTreeNode(null, null, this.tree);
+		this.context = new NginxParseTreeNode('', null, this.tree);
 		this.error = null;
 
 		do {
@@ -111,13 +111,13 @@ export class NginxParser {
 
 					this.context.value = this.readVerbatimBlock();
 					this.context.isVerbatim = true;
-					this.context = new NginxParseTreeNode(null, null, this.context.parent);
+					this.context = new NginxParseTreeNode('', null, this.context.parent);
 				} else {
 					if (c === '{') {
 						this.context.isBlock = true;
 					}
 					//new context is child of current context, or a sibling to the parent
-					this.context = new NginxParseTreeNode(null, null, c === '{' ? this.context : this.context.parent);
+					this.context = new NginxParseTreeNode('', null, c === '{' ? this.context : this.context.parent);
 				}
 
 				this.index++;
@@ -127,7 +127,7 @@ export class NginxParser {
 				if (!this.context.parent) {
 					throw new Error('context.parent does not exist');
 				}
-				this.context = new NginxParseTreeNode(null, null, this.context.parent.parent);
+				this.context = new NginxParseTreeNode('', null, this.context.parent.parent);
 				this.index++;
 				break;
 			case '\n':

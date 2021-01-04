@@ -1,12 +1,12 @@
 export declare class NginxParseTreeNode {
-    name: string | null;
+    name: string;
     value: string;
     parent: NginxParseTreeNode | null;
     readonly children: NginxParseTreeNode[] | null;
     readonly comments: string[];
     isVerbatim: boolean;
     isBlock: boolean;
-    constructor(name: string | null, value: string | null, parent: NginxParseTreeNode | null, children?: NginxParseTreeNode[] | null);
+    constructor(name: string, value: string | null, parent: NginxParseTreeNode | null, children?: NginxParseTreeNode[] | null);
 }
 export interface NginxParseError {
     message: string;

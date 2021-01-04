@@ -54,12 +54,13 @@ describe('flushing to disk', function() {
 			file.on('flushed', function() {
 				NginxConfFile.create(tempFile, function(err, file) {
 					should.not.exist(err);
-					file.nginx.user.should.have.property('_value', 'lollersk8');
+					file.nginx.user.should.be.an.Array().have.length(1);
+					file.nginx.user[0].should.have.property('_value', 'lollersk8');
 					done();
 				});
 			});
 
-			file.nginx.user._value = 'lollersk8';
+			file.nginx.user[0]._value = 'lollersk8';
 		});
 	});
 
@@ -69,13 +70,14 @@ describe('flushing to disk', function() {
 			file.on('flushed', function() {
 				NginxConfFile.create(tempFile, function(err, file) {
 					should.not.exist(err);
-					file.nginx.user.should.have.property('foo');
-					file.nginx.user.foo.should.have.property('_value', 'bar');
+					file.nginx.user.should.be.an.Array().have.length(1);
+					file.nginx.user[0].should.have.property('foo').be.an.Array().have.length(1);
+					file.nginx.user[0].foo[0].should.have.property('_value', 'bar');
 					done();
 				});
 			});
 
-			file.nginx.user._add('foo', 'bar');
+			file.nginx.user[0]._add('foo', 'bar');
 		});
 	});
 
@@ -123,13 +125,13 @@ describe('flushing to disk', function() {
 			file.on('flushed', function() {
 				NginxConfFile.create(tempFile, function(err, file) {
 					should.not.exist(err);
-					file.nginx.user.should.have.property('_value', 'lollersk8');
+					file.nginx.user[0].should.have.property('_value', 'lollersk8');
 					done();
 				});
 			});
 
 			file.die(tempFile);
-			file.nginx.user._value = 'lollersk8';
+			file.nginx.user[0]._value = 'lollersk8';
 			file.live(tempFile);
 			file.flush();
 		});
@@ -144,7 +146,7 @@ describe('flushing to disk', function() {
 				flushed = true;
 			});
 
-			file.nginx.user._value = 'lollersk8';
+			file.nginx.user[0]._value = 'lollersk8';
 
 			setTimeout(function() {
 				flushed.should.equal(false, 'should not have triggered flushed event');
@@ -203,7 +205,7 @@ describe('flushing to disk', function() {
 			});
 
 			file.live(backupFile);
-			file.nginx.foo._value = 'lollersk8';
+			file.nginx.foo[0]._value = 'lollersk8';
 		});
 	});
 });

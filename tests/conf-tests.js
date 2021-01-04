@@ -7,9 +7,9 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('foo bar;', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('foo');
-				file.nginx.foo.should.have.property('_name', 'foo');
-				file.nginx.foo.should.have.property('_value', 'bar');
+				file.nginx.should.have.property('foo').be.an.Array().have.length(1);
+				file.nginx.foo[0].should.have.property('_name', 'foo');
+				file.nginx.foo[0].should.have.property('_value', 'bar');
 				done();
 			});
 		});
@@ -18,13 +18,13 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('upstream backend { servers { server 127.0.0.1:8080; } }', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('upstream');
-				file.nginx.upstream.should.have.property('_name', 'upstream');
-				file.nginx.upstream.should.have.property('_value', 'backend');
-				file.nginx.upstream.should.have.property('servers');
-				file.nginx.upstream.servers.should.have.property('_value', '');
-				file.nginx.upstream.servers.should.have.property('server');
-				file.nginx.upstream.servers.server.should.have.property('_value', '127.0.0.1:8080');
+				file.nginx.should.have.property('upstream').be.an.Array().have.length(1);
+				file.nginx.upstream[0].should.have.property('_name', 'upstream');
+				file.nginx.upstream[0].should.have.property('_value', 'backend');
+				file.nginx.upstream[0].should.have.property('servers').be.an.Array().have.length(1);
+				file.nginx.upstream[0].servers[0].should.have.property('_value', '');
+				file.nginx.upstream[0].servers[0].should.have.property('server').be.an.Array().have.length(1);
+				file.nginx.upstream[0].servers[0].server[0].should.have.property('_value', '127.0.0.1:8080');
 				done();
 			});
 		});
@@ -33,21 +33,21 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('map $http_user_agent $mobile { default 0; "~Opera Mini" 1; \'\' meh; }', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('map');
-				file.nginx.map.should.have.property('_name', 'map');
-				file.nginx.map.should.have.property('_value', '$http_user_agent $mobile');
+				file.nginx.should.have.property('map').be.an.Array().have.length(1);
+				file.nginx.map[0].should.have.property('_name', 'map');
+				file.nginx.map[0].should.have.property('_value', '$http_user_agent $mobile');
 
-				file.nginx.map.should.have.property('default');
-				file.nginx.map.default.should.have.property('_name', 'default');
-				file.nginx.map.default.should.have.property('_value', '0');
+				file.nginx.map[0].should.have.property('default').be.an.Array().have.length(1);
+				file.nginx.map[0].default[0].should.have.property('_name', 'default');
+				file.nginx.map[0].default[0].should.have.property('_value', '0');
 
-				file.nginx.map.should.have.property('"~Opera Mini"');
-				file.nginx.map['"~Opera Mini"'].should.have.property('_name', '"~Opera Mini"');
-				file.nginx.map['"~Opera Mini"'].should.have.property('_value', '1');
+				file.nginx.map[0].should.have.property('"~Opera Mini"').be.an.Array().have.length(1);
+				file.nginx.map[0]['"~Opera Mini"'][0].should.have.property('_name', '"~Opera Mini"');
+				file.nginx.map[0]['"~Opera Mini"'][0].should.have.property('_value', '1');
 
-				file.nginx.map.should.have.property('\'\'');
-				file.nginx.map['\'\''].should.have.property('_name', '\'\'');
-				file.nginx.map['\'\''].should.have.property('_value', 'meh');
+				file.nginx.map[0].should.have.property('\'\'').be.an.Array().have.length(1);
+				file.nginx.map[0]['\'\''][0].should.have.property('_name', '\'\'');
+				file.nginx.map[0]['\'\''][0].should.have.property('_value', 'meh');
 				done();
 			});
 		});
@@ -56,13 +56,11 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('location /foo { bar baz; } location /bar { bat qux; }', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('location');
-				file.nginx.location.should.be.an.instanceOf(Array);
-				file.nginx.location.should.have.length(2);
-				file.nginx.location[0].should.have.property('bar');
-				file.nginx.location[0].bar.should.have.property('_value', 'baz');
-				file.nginx.location[1].should.have.property('bat');
-				file.nginx.location[1].bat.should.have.property('_value', 'qux');
+				file.nginx.should.have.property('location').be.an.Array().have.length(2);
+				file.nginx.location[0].should.have.property('bar').be.an.Array().have.length(1);
+				file.nginx.location[0].bar[0].should.have.property('_value', 'baz');
+				file.nginx.location[1].should.have.property('bat').be.an.Array().have.length(1);
+				file.nginx.location[1].bat[0].should.have.property('_value', 'qux');
 				done();
 			});
 		});
@@ -71,10 +69,10 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('foo bar;', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('foo');
-				file.nginx.foo._comments.should.have.length(0);
-				file.nginx.foo._comments.push('new comment');
-				file.nginx.foo._comments.should.have.length(1);
+				file.nginx.should.have.property('foo').be.an.Array().have.length(1);
+				file.nginx.foo[0]._comments.should.have.length(0);
+				file.nginx.foo[0]._comments.push('new comment');
+				file.nginx.foo[0]._comments.should.have.length(1);
 				done();
 			});
 		});
@@ -83,11 +81,11 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('#comment\nfoo bar;', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('foo');
-				file.nginx.foo._comments.should.have.length(1);
-				file.nginx.foo._comments[0].should.equal('comment');
-				file.nginx.foo._comments.splice(0, 1);
-				file.nginx.foo._comments.should.have.length(0);
+				file.nginx.should.have.property('foo').be.an.Array().have.length(1);
+				file.nginx.foo[0]._comments.should.have.length(1);
+				file.nginx.foo[0]._comments[0].should.equal('comment');
+				file.nginx.foo[0]._comments.splice(0, 1);
+				file.nginx.foo[0]._comments.should.have.length(0);
 				done();
 			});
 		});
@@ -96,11 +94,11 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('#comment\nfoo bar;', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('foo');
-				file.nginx.foo._comments.should.have.length(1);
-				file.nginx.foo._comments[0].should.equal('comment');
-				file.nginx.foo._comments[0] = 'changed';
-				file.nginx.foo._comments[0].should.equal('changed');
+				file.nginx.should.have.property('foo').be.an.Array().have.length(1);
+				file.nginx.foo[0]._comments.should.have.length(1);
+				file.nginx.foo[0]._comments[0].should.equal('comment');
+				file.nginx.foo[0]._comments[0] = 'changed';
+				file.nginx.foo[0]._comments[0].should.equal('changed');
 				done();
 			});
 		});
@@ -155,8 +153,8 @@ describe('configuration editing', function() {
 					oldValue.should.equal('bar');
 					context._value.should.equal('baz');
 				});
-				file.nginx.should.have.property('foo');
-				file.nginx.foo._value = 'baz';
+				file.nginx.should.have.property('foo').be.an.Array().have.length(1);
+				file.nginx.foo[0]._value = 'baz';
 				count.should.equal(1);
 				done();
 			});
@@ -170,8 +168,8 @@ describe('configuration editing', function() {
 				file.on('changed', function() {
 					count++;
 				});
-				file.nginx.should.have.property('foo');
-				file.nginx.foo._value = 'bar';
+				file.nginx.should.have.property('foo').be.an.Array().have.length(1);
+				file.nginx.foo[0]._value = 'bar';
 				count.should.equal(0);
 				done();
 			});
@@ -185,7 +183,7 @@ describe('configuration editing', function() {
 				file.on('removed', function() {
 					count++;
 				});
-				file.nginx.should.have.property('foo');
+				file.nginx.should.have.property('foo').be.an.Array().have.length(1);
 				file.nginx._remove('bar');
 				count.should.equal(0);
 				done();
@@ -204,7 +202,8 @@ describe('configuration editing', function() {
 			toString: 1,
 			_comments: 1,
 			_isVerbatim: 1,
-			_addVerbatimBlock: 1
+			_addVerbatimBlock: 1,
+			__isBlock: 1
 		};
 		for (var name in blacklist) {
 			(function(name) {
@@ -236,10 +235,10 @@ describe('configuration editing', function() {
 				should.exist(file);
 				file.nginx._add('server');
 
-				file.nginx.should.have.property('server');
-				file.nginx.server._add('foo', 'bar');
-				file.nginx.server.should.have.property('foo');
-				file.nginx.server.foo.should.have.property('_value', 'bar');
+				file.nginx.should.have.property('server').be.an.Array().have.length(1);
+				file.nginx.server[0]._add('foo', 'bar');
+				file.nginx.server[0].should.have.property('foo').be.an.Array().have.length(1);
+				file.nginx.server[0].foo[0].should.have.property('_value', 'bar');
 				done();
 			});
 		});
@@ -248,14 +247,14 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('server {}', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('server');
+				file.nginx.should.have.property('server').be.an.Array().have.length(1);
 				file.nginx._add('server');
 
-				file.nginx.server.should.be.instanceOf(Array);
+				file.nginx.server.should.have.length(2);
 				file.nginx.server[1]._add('foo', 'bar');
 				file.nginx.server[0].should.not.have.property('foo');
-				file.nginx.server[1].should.have.property('foo');
-				file.nginx.server[1].foo.should.have.property('_value', 'bar');
+				file.nginx.server[1].should.have.property('foo').be.an.Array().have.length(1);
+				file.nginx.server[1].foo[0].should.have.property('_value', 'bar');
 				done();
 			});
 		});
@@ -266,10 +265,10 @@ describe('configuration editing', function() {
 				should.exist(file);
 				file.nginx._addVerbatimBlock('content_by_lua_block', 'echo "hello"');
 
-				file.nginx.should.have.property('content_by_lua_block');
-				file.nginx.content_by_lua_block.should.have.property('_name', 'content_by_lua_block');
-				file.nginx.content_by_lua_block.should.have.property('_value', 'echo "hello"');
-				file.nginx.content_by_lua_block.should.have.property('_isVerbatim', true);
+				file.nginx.should.have.property('content_by_lua_block').be.an.Array().have.length(1);
+				file.nginx.content_by_lua_block[0].should.have.property('_name', 'content_by_lua_block');
+				file.nginx.content_by_lua_block[0].should.have.property('_value', 'echo "hello"');
+				file.nginx.content_by_lua_block[0].should.have.property('_isVerbatim', true);
 
 				file.toString().should.equal('content_by_lua_block {echo "hello"}\n');
 				done();
@@ -282,9 +281,9 @@ describe('configuration editing', function() {
 				should.exist(file);
 				file.nginx._add('events', '', []);
 
-				file.nginx.should.have.property('events');
-				file.nginx.events.should.have.property('_name', 'events');
-				file.nginx.events.should.have.property('__isBlock', true);
+				file.nginx.should.have.property('events').be.an.Array().have.length(1);
+				file.nginx.events[0].should.have.property('_name', 'events');
+				file.nginx.events[0].should.have.property('__isBlock', true);
 
 				file.toString().should.equal('events {\n}\n');
 				done();
@@ -295,12 +294,11 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('foo bar;', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('foo');
-				file.nginx.foo.should.have.property('_value', 'bar');
+				file.nginx.should.have.property('foo').be.an.Array().have.length(1);
+				file.nginx.foo[0].should.have.property('_value', 'bar');
 				file.nginx._add('foo', 'baz');
 				file.nginx._add('foo', 'bat');
 
-				file.nginx.foo.should.be.an.instanceOf(Array);
 				file.nginx.foo.should.have.length(3);
 				file.nginx.foo[0].should.have.property('_value', 'bar');
 				file.nginx.foo[1].should.have.property('_value', 'baz');
@@ -313,10 +311,10 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('location /foo { hello world; }', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('location');
-				file.nginx.location.should.have.property('_value', '/foo');
-				file.nginx.location.should.have.property('hello');
-				file.nginx.location.hello.should.have.property('_value', 'world');
+				file.nginx.should.have.property('location').be.an.Array().have.length(1);
+				file.nginx.location[0].should.have.property('_value', '/foo');
+				file.nginx.location[0].should.have.property('hello').be.an.Array().have.length(1);
+				file.nginx.location[0].hello[0].should.have.property('_value', 'world');
 				done();
 			});
 		});
@@ -325,9 +323,7 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('foo bar; foo baz; foo bat;', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('foo');
-				file.nginx.foo.should.be.an.instanceOf(Array);
-				file.nginx.foo.should.have.length(3);
+				file.nginx.should.have.property('foo').be.an.Array().have.length(3);
 
 				file.nginx._remove('foo');
 				file.nginx.foo.should.have.length(2);
@@ -341,9 +337,7 @@ describe('configuration editing', function() {
 			NginxConfFile.createFromSource('foo bar; foo baz; foo bat;', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('foo');
-				file.nginx.foo.should.be.an.instanceOf(Array);
-				file.nginx.foo.should.have.length(3);
+				file.nginx.should.have.property('foo').be.an.Array().have.length(3);
 
 				file.nginx._remove('foo', 1);
 				file.nginx.foo.should.have.length(2);
@@ -353,17 +347,15 @@ describe('configuration editing', function() {
 			});
 		});
 
-		it('should flatten array into property when only one item remains', function(done) {
+		it('should not flatten array into property when only one item remains', function(done) {
 			NginxConfFile.createFromSource('foo bar; foo baz;', function(err, file) {
 				should.not.exist(err);
 				should.exist(file);
-				file.nginx.should.have.property('foo');
-				file.nginx.foo.should.be.an.instanceOf(Array);
-				file.nginx.foo.should.have.length(2);
+				file.nginx.should.have.property('foo').be.an.Array().have.length(2);
 
 				file.nginx._remove('foo', 0);
-				file.nginx.foo.should.not.be.an.instanceOf(Array);
-				file.nginx.foo.should.have.property('_value', 'baz');
+				file.nginx.foo.should.have.length(1);
+				file.nginx.foo[0].should.have.property('_value', 'baz');
 				done();
 			});
 		});

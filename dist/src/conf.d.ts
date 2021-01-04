@@ -20,7 +20,7 @@ interface NginxConfItemProps {
     __isBlock: boolean;
 }
 interface IndexableConfItem {
-    [key: string]: NginxConfItem[] | NginxConfItem | undefined;
+    [key: string]: NginxConfItem[] | undefined;
 }
 export declare type NginxConfItem = NginxConfItemApi & IndexableConfItem & NginxConfItemProps;
 interface AddOptions {

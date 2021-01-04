@@ -49,24 +49,11 @@ const createConfItem = (file, target, node) => {
             if (!node) {
                 return newContext;
             }
-            let removed = null;
-            if (Array.isArray(node)) {
-                const arr = node;
-                if (arr[index]) {
-                    removed = arr[index];
-                    arr.splice(index, 1);
-                    if (arr.length === 1) {
-                        item[name] = arr[0];
-                    }
-                    file.emit('removed', removed);
+            if (node[index]) {
+                const removed = node.splice(index, 1);
+                if (removed.length) {
+                    file.emit('removed', removed[0]);
                 }
-            }
-            else {
-                removed = node;
-                delete item[name];
-            }
-            if (removed) {
-                file.emit('removed', removed);
             }
             return item;
         },
@@ -128,9 +115,6 @@ const createConfItem = (file, target, node) => {
                             buffer += prop[j]._getString(depth + 1);
                         }
                     }
-                    else if (typeof (prop) !== 'undefined') {
-                        buffer += prop._getString(depth + 1);
-                    }
                 }
                 if (!item._root) {
                     buffer += prefix + '}\n';
@@ -161,42 +145,35 @@ const createConfItem = (file, target, node) => {
             file.emit('changed', newContext, oldValue);
         }
     });
+    const defineProperty = (name, value) => {
+        Object.defineProperty(newContext, name, {
+            enumerable: false,
+            value,
+            writable: false
+        });
+    };
     // This property is for *internal* use only!
     // When this property is true, the item is definitely a block, but the
     // reverse implication may not apply! It's just a hack to ensure that empty
     // blocks are rendered as blocks.
-    Object.defineProperty(newContext, '__isBlock', {
-        enumerable: false,
-        value: node.isBlock,
-        writable: false
-    });
-    Object.defineProperty(newContext, '_isVerbatim', {
-        enumerable: false,
-        value: node.isVerbatim,
-        writable: false
-    });
-    Object.defineProperty(newContext, '_name', {
-        enumerable: false,
-        value: name,
-        writable: false
-    });
-    Object.defineProperty(newContext, '_comments', {
-        enumerable: false,
-        value: comments,
-        writable: false
-    });
+    defineProperty('__isBlock', node.isBlock);
+    defineProperty('_isVerbatim', node.isVerbatim);
+    defineProperty('_name', name);
+    defineProperty('_comments', comments);
     const item = newContext;
-    if (name !== null) {
+    if (name) {
         const existing = target[name];
         if (existing) {
-            //already exists, create an array or append it to the new one
-            if (!Array.isArray(existing)) {
-                target[name] = [existing];
-            }
-            target[name].push(item);
+            existing.push(item);
         }
         else {
-            target[name] = item;
+            if (name === 'nginx') {
+                // TODO: ugh
+                target[name] = item;
+            }
+            else {
+                target[name] = [item];
+            }
         }
     }
     if (children) {

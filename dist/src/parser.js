@@ -51,7 +51,7 @@ class NginxParser {
         this.source = source;
         this.index = 0;
         this.tree = new NginxParseTreeNode('[root]', '', null, []);
-        this.context = new NginxParseTreeNode(null, null, this.tree);
+        this.context = new NginxParseTreeNode('', null, this.tree);
         this.error = null;
         do {
             this.parseNext();
@@ -101,14 +101,14 @@ class NginxParser {
                     }
                     this.context.value = this.readVerbatimBlock();
                     this.context.isVerbatim = true;
-                    this.context = new NginxParseTreeNode(null, null, this.context.parent);
+                    this.context = new NginxParseTreeNode('', null, this.context.parent);
                 }
                 else {
                     if (c === '{') {
                         this.context.isBlock = true;
                     }
                     //new context is child of current context, or a sibling to the parent
-                    this.context = new NginxParseTreeNode(null, null, c === '{' ? this.context : this.context.parent);
+                    this.context = new NginxParseTreeNode('', null, c === '{' ? this.context : this.context.parent);
                 }
                 this.index++;
                 break;
@@ -117,7 +117,7 @@ class NginxParser {
                 if (!this.context.parent) {
                     throw new Error('context.parent does not exist');
                 }
-                this.context = new NginxParseTreeNode(null, null, this.context.parent.parent);
+                this.context = new NginxParseTreeNode('', null, this.context.parent.parent);
                 this.index++;
                 break;
             case '\n':
