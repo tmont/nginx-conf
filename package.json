@@ -1,6 +1,6 @@
 {
 	"name": "nginx-conf",
-	"version": "1.7.0",
+	"version": "2.0.0",
 	"description": "Dynamically update nginx configuration files via programmatic API",
 	"license": "MIT",
 	"keywords": [
