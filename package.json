@@ -8,9 +8,6 @@
 		"configuration",
 		"parser"
 	],
-	"directories": {
-		"lib": "src"
-	},
 	"files": [
 		"dist"
 	],
