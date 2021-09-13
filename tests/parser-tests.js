@@ -221,6 +221,28 @@ describe('parser', function() {
 		});
 	});
 
+	it('should parse double handlebar delimited template expression', function(done) {
+		parser.parse('port {{var}};', function(err, tree) {
+			should.not.exist(err);
+			should.exist(tree);
+			tree.children.should.have.length(1);
+			tree.children[0].should.have.property('name', 'port');
+			tree.children[0].should.have.property('value', '{{var}}');
+			done();
+		});
+	});
+
+	it('should parse double handlebar delimited template expression with variable declaration', function(done) {
+		parser.parse('port {{env "var"}};', function(err, tree) {
+			should.not.exist(err);
+			should.exist(tree);
+			tree.children.should.have.length(1);
+			tree.children[0].should.have.property('name', 'port');
+			tree.children[0].should.have.property('value', '{{env "var"}}');
+			done();
+		});
+	});
+
 	describe('scopes', function() {
 		it('should parse children', function(done) {
 			parser.parse('foo { bar; }', function(err, tree) {
@@ -483,6 +505,14 @@ describe('parser', function() {
 		it('missing closing brace should not throw', function(done) {
 			parser.parse('foo { bar;', function(err) {
 				should.not.exist(err);
+				done();
+			});
+		});
+
+		it('go block not properly terminated with "}}"', function(done) {
+			parser.parse('port {{env "port"}', function(err, tree) {
+				should.exist(err);
+				err.should.have.property('message', 'Block not terminated. Are you missing "}}" ?');
 				done();
 			});
 		});

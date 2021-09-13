@@ -86,6 +86,11 @@ export class NginxParser {
 
 		switch (c) {
 			case '{':
+				if ((this.index < this.source.length -1) && (this.source.charAt(this.index + 1) == '{')) {
+					this.context.value += this.readBlockPattern();
+					break;
+				}
+	
 			case ';':
 				this.context.value = this.context.value.trim();
 				if (!this.context.parent) {
@@ -264,7 +269,18 @@ export class NginxParser {
 
 		return result.replace(/^{/, '').replace(/}$/, '');
 	}
-
+	
+	public readBlockPattern(): string {
+		var result = /^({{)(.+?)(}})/.exec(this.source.substring(this.index));
+		if (!result) {
+			this.setError('Block not terminated. Are you missing "}}" ?');
+			return '';
+		}
+		this.index += result[0].length;
+		var block = result[0];
+		return block;
+	}
+	
 	public parseFile(
 		file: string,
 		encoding = 'utf8',
