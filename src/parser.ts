@@ -35,13 +35,15 @@ export class NginxParser {
 	private context: NginxParseTreeNode | null = null;
 	private tree: NginxParseTreeNode | null = null;
 	private error: NginxParseError | null = null;
+	private options: {goSyntax: false};
 
-	public constructor() {
+	public constructor(options?: {goSyntax: false}) {
 		this.source = '';
 		this.index = -1;
 		this.tree = null;
 		this.context = null;
 		this.error = null;
+		(!options) ? this.options = {goSyntax: false} : this.options = options;
 	}
 
 	public parse(source: string, callback?: (err: Error | null, tree?: NginxParseTreeNode) => void): void {
@@ -86,6 +88,10 @@ export class NginxParser {
 
 		switch (c) {
 			case '{':
+				if ((this.options.goSyntax && this.index < this.source.length -1) && (this.source.charAt(this.index + 1) == '{')) {
+					this.context.value += this.readBlockPattern();
+					break;
+				} 
 			case ';':
 				this.context.value = this.context.value.trim();
 				if (!this.context.parent) {
@@ -265,6 +271,17 @@ export class NginxParser {
 		return result.replace(/^{/, '').replace(/}$/, '');
 	}
 
+	public readBlockPattern(): string {
+		var result = /^({{)(.+?)(}})/.exec(this.source.substring(this.index));
+		if (!result) {
+			this.setError('Block not terminated. Are you missing "}}" ?');
+			return '';
+		}
+		this.index += result[0].length;
+		var block = result[0];
+		return block;
+	}
+
 	public parseFile(
 		file: string,
 		encoding = 'utf8',
@@ -281,10 +298,10 @@ export class NginxParser {
 	}
 }
 
-export const parse = (source: string, callback: (err: Error | null, tree?: NginxParseTreeNode) => void): void => {
-	new NginxParser().parse(source, callback);
+export const parse = (source: string, callback: (err: Error | null, tree?: NginxParseTreeNode) => void, options?: {goSyntax: false}): void => {
+	new NginxParser(options).parse(source, callback);
 };
 
-export const parseFile = (file: string, encoding: string, callback: (err: Error | null, tree?: NginxParseTreeNode) => void): void => {
-	new NginxParser().parseFile(file, encoding, callback);
+export const parseFile = (file: string, encoding: string, callback: (err: Error | null, tree?: NginxParseTreeNode) => void, options?: {goSyntax: false}): void => {
+	new NginxParser(options).parseFile(file, encoding, callback);
 }
