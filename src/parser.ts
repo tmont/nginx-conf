@@ -29,21 +29,25 @@ export interface NginxParseError {
 	line: number;
 }
 
+export interface NginxParseOptions {
+	templateSyntax: boolean;
+}
+
 export class NginxParser {
 	private source = '';
 	private index = -1;
 	private context: NginxParseTreeNode | null = null;
 	private tree: NginxParseTreeNode | null = null;
 	private error: NginxParseError | null = null;
-	private options: {goSyntax: false};
+	private options: NginxParseOptions = {templateSyntax: false};
 
-	public constructor(options?: {goSyntax: false}) {
+	public constructor(options?: NginxParseOptions) {
 		this.source = '';
 		this.index = -1;
 		this.tree = null;
 		this.context = null;
 		this.error = null;
-		(!options) ? this.options = {goSyntax: false} : this.options = options;
+		this.options = options || {templateSyntax: false};
 	}
 
 	public parse(source: string, callback?: (err: Error | null, tree?: NginxParseTreeNode) => void): void {
@@ -88,7 +92,7 @@ export class NginxParser {
 
 		switch (c) {
 			case '{':
-				if ((this.options.goSyntax && this.index < this.source.length -1) && (this.source.charAt(this.index + 1) == '{')) {
+				if ((this.options.templateSyntax && this.index < this.source.length -1) && (this.source.charAt(this.index + 1) == '{')) {
 					this.context.value += this.readBlockPattern();
 					break;
 				} 
@@ -298,10 +302,10 @@ export class NginxParser {
 	}
 }
 
-export const parse = (source: string, callback: (err: Error | null, tree?: NginxParseTreeNode) => void, options?: {goSyntax: false}): void => {
+export const parse = (source: string, callback: (err: Error | null, tree?: NginxParseTreeNode) => void, options?: NginxParseOptions): void => {
 	new NginxParser(options).parse(source, callback);
 };
 
-export const parseFile = (file: string, encoding: string, callback: (err: Error | null, tree?: NginxParseTreeNode) => void, options?: {goSyntax: false}): void => {
+export const parseFile = (file: string, encoding: string, callback: (err: Error | null, tree?: NginxParseTreeNode) => void, options?: NginxParseOptions): void => {
 	new NginxParser(options).parseFile(file, encoding, callback);
 }

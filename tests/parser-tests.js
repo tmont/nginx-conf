@@ -229,7 +229,7 @@ describe('parser', function() {
 			tree.children[0].should.have.property('name', 'port');
 			tree.children[0].should.have.property('value', '{{var}}');
 			done();
-		}, {goSyntax: true});
+		}, {templateSyntax: true});
 	});
 
 	it('should parse double handlebar delimited template expression with variable declaration', function(done) {
@@ -240,7 +240,7 @@ describe('parser', function() {
 			tree.children[0].should.have.property('name', 'port');
 			tree.children[0].should.have.property('value', '{{env "var"}}');
 			done();
-		}, {goSyntax: true});
+		}, {templateSyntax: true});
 	});
 
 	describe('scopes', function() {
@@ -514,7 +514,7 @@ describe('parser', function() {
 				should.exist(err);
 				err.should.have.property('message', 'Block not terminated. Are you missing "}}" ?');
 				done();
-			}, {goSyntax: true});
+			}, {templateSyntax: true});
 		});
 	});
 
