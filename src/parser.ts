@@ -95,7 +95,8 @@ export class NginxParser {
 				if ((this.options.templateSyntax && this.index < this.source.length -1) && (this.source.charAt(this.index + 1) == '{')) {
 					this.context.value += this.readBlockPattern();
 					break;
-				} 
+				}
+				// intentional fall-through
 			case ';':
 				this.context.value = this.context.value.trim();
 				if (!this.context.parent) {
@@ -276,14 +277,13 @@ export class NginxParser {
 	}
 
 	public readBlockPattern(): string {
-		var result = /^({{)(.+?)(}})/.exec(this.source.substring(this.index));
+		const result = /^({{)(.+?)(}})/.exec(this.source.substring(this.index));
 		if (!result) {
 			this.setError('Block not terminated. Are you missing "}}" ?');
 			return '';
 		}
 		this.index += result[0].length;
-		var block = result[0];
-		return block;
+		return result[0];
 	}
 
 	public parseFile(
