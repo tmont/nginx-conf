@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -35,17 +39,19 @@ class NginxParseTreeNode {
 }
 exports.NginxParseTreeNode = NginxParseTreeNode;
 class NginxParser {
-    constructor() {
+    constructor(options) {
         this.source = '';
         this.index = -1;
         this.context = null;
         this.tree = null;
         this.error = null;
+        this.options = { templateSyntax: false };
         this.source = '';
         this.index = -1;
         this.tree = null;
         this.context = null;
         this.error = null;
+        this.options = options || { templateSyntax: false };
     }
     parse(source, callback) {
         this.source = source;
@@ -81,6 +87,11 @@ class NginxParser {
         }
         switch (c) {
             case '{':
+                if ((this.options.templateSyntax && this.index < this.source.length - 1) && (this.source.charAt(this.index + 1) == '{')) {
+                    this.context.value += this.readBlockPattern();
+                    break;
+                }
+            // intentional fall-through
             case ';':
                 this.context.value = this.context.value.trim();
                 if (!this.context.parent) {
@@ -242,6 +253,15 @@ class NginxParser {
         }
         return result.replace(/^{/, '').replace(/}$/, '');
     }
+    readBlockPattern() {
+        const result = /^({{)(.+?)(}})/.exec(this.source.substring(this.index));
+        if (!result) {
+            this.setError('Block not terminated. Are you missing "}}" ?');
+            return '';
+        }
+        this.index += result[0].length;
+        return result[0];
+    }
     parseFile(file, encoding = 'utf8', callback) {
         fs.readFile(file, encoding, (err, contents) => {
             if (err) {
@@ -253,12 +273,12 @@ class NginxParser {
     }
 }
 exports.NginxParser = NginxParser;
-const parse = (source, callback) => {
-    new NginxParser().parse(source, callback);
+const parse = (source, callback, options) => {
+    new NginxParser(options).parse(source, callback);
 };
 exports.parse = parse;
-const parseFile = (file, encoding, callback) => {
-    new NginxParser().parseFile(file, encoding, callback);
+const parseFile = (file, encoding, callback, options) => {
+    new NginxParser(options).parseFile(file, encoding, callback);
 };
 exports.parseFile = parseFile;
 //# sourceMappingURL=parser.js.map
