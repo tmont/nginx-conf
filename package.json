@@ -27,6 +27,6 @@
 	"scripts": {
 		"build": "node_modules/.bin/tsc",
 		"watch": "node_modules/.bin/tsc --watch --incremental --preserveWatchOutput",
-		"test": "node_modules/.bin/mocha -R spec ./tests"
+		"test": "node_modules/.bin/mocha -R spec -t 10000 ./tests"
 	}
 }
