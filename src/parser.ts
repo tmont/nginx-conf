@@ -288,7 +288,7 @@ export class NginxParser {
 
 	public parseFile(
 		file: string,
-		encoding = 'utf8',
+		encoding: BufferEncoding = 'utf8',
 		callback?: (err: Error | null, tree?: NginxParseTreeNode) => void,
 	): void {
 		fs.readFile(file, encoding, (err, contents) => {
@@ -306,6 +306,6 @@ export const parse = (source: string, callback: (err: Error | null, tree?: Nginx
 	new NginxParser(options).parse(source, callback);
 };
 
-export const parseFile = (file: string, encoding: string, callback: (err: Error | null, tree?: NginxParseTreeNode) => void, options?: NginxParseOptions): void => {
+export const parseFile = (file: string, encoding: BufferEncoding, callback: (err: Error | null, tree?: NginxParseTreeNode) => void, options?: NginxParseOptions): void => {
 	new NginxParser(options).parseFile(file, encoding, callback);
 }
