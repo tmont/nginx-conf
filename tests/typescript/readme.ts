@@ -1,5 +1,6 @@
 // vanilla JS: const NginxConfFile = require('nginx-conf').NginxConfFile;
-import {NginxConfFile} from '../../';
+import {NginxConfFile, parse} from '../../';
+import {NginxParseOptions} from '../../src/parser';
 
 const filename = `${__dirname}/../files/readme.conf`;
 
@@ -114,3 +115,12 @@ NginxConfFile.create(filename, function (err, conf) {
 
 	conf.flush();
 });
+
+const options: NginxParseOptions = {
+	templateSyntax: true,
+};
+parse('foo', (err, result) => {
+	if (!err && result) {
+		console.log(result.parent?.value);
+	}
+}, options);

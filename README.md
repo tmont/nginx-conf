@@ -205,8 +205,10 @@ console.log(conf.nginx.foo[0]._comments.length); //0
 Support for go template syntax is provided via `NginxParserOptions`.  By default, templating syntax is not supported.
 
 To enable templating syntax, pass the following `NginxParserOptions` to the `parser.parse` or `parser.parseFile` function(s):
-```json
-{templateSyntax: true}
+```javascript
+{
+  templateSyntax: true
+}
 ```
 
 ## Development
