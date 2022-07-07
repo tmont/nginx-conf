@@ -1,10 +1,9 @@
 # nginx-conf
 
-[![Build Status](https://travis-ci.org/tmont/nginx-conf.png)](https://travis-ci.org/tmont/nginx-conf)
-[![NPM version](https://badge.fury.io/js/nginx-conf.png)](http://badge.fury.io/js/nginx-conf)
-
 `nginx-conf` is a node module for making changes to an [nginx](http://nginx.org) configuration
 file programmatically.
+
+[![NPM version](https://badge.fury.io/js/nginx-conf.png)](http://badge.fury.io/js/nginx-conf)
 
 ## Installation
 `npm install nginx-conf`
